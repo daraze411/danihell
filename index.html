@@ -23,28 +23,19 @@
 /* Layout: un palco da tavolo — locandina del concerto in alto, piano di lancio al centro, verbale in fondo.
    Ogni personaggio ha il suo colore: Lucifero rosso brace, Dani Metallaro ottone da amplificatore, Dani Nerd verde da schermo. */
 :root{
-  --bg:#efeae6; --surface:#fbf8f6; --surface2:#e6dfda; --ink:#1d1416; --muted:#6a5a5c; --line:#d3c7c2;
-  --luci:#b3201a; --luci-soft:#f4d9d5; --dmetal:#8a5a00; --dmetal-soft:#f3e6c6; --dnerd:#137a55; --dnerd-soft:#d3eee2;
+  --bg:#130d0f; --surface:#1d1517; --surface2:#271c1f; --ink:#f3ebe6; --muted:#b09ea0; --line:#3a2b2e;
+  --luci:#ff5b4d; --luci-soft:#3a1716; --dmetal:#f2b134; --dmetal-soft:#3a2c10; --dnerd:#45d69c; --dnerd-soft:#12301f;
   --thief:var(--luci); --thief-soft:var(--luci-soft); --police:var(--dmetal); --police-soft:var(--dmetal-soft);
-  --accent:#6d3fd6; --accent-ink:#ffffff; --good:#2b8150; --bad:#b8452f;
-  --dieL:#fffdf8; --dieL-pip:#1d1416; --dieP:#ffffff; --dieP-pip:#1d1416; --die-edge:#cbbdb7;
-  --stripe:#1d1416;
+  --accent:#a98bff; --accent-ink:#160d2a; --good:#5cc47f; --bad:#ff7a5e;
+  --dieL:#fbf6ea; --dieL-pip:#1d1416; --dieP:#f3efe9; --dieP-pip:#1d1416; --die-edge:#3a2b2e;
+  --stripe:#f3ebe6;
   --display:"Metal Mania","Impact","Haettenschweiler",fantasy;
   --body:"Jost","Futura","Century Gothic",system-ui,sans-serif;
   --label:"Jost","Futura","Century Gothic",system-ui,sans-serif;
+  color-scheme:dark;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#130d0f; --surface:#1d1517; --surface2:#271c1f; --ink:#f3ebe6; --muted:#b09ea0; --line:#3a2b2e;
-  --luci:#ff5b4d; --luci-soft:#3a1716; --dmetal:#f2b134; --dmetal-soft:#3a2c10; --dnerd:#45d69c; --dnerd-soft:#12301f;
-  --accent:#a98bff; --accent-ink:#160d2a; --good:#5cc47f; --bad:#ff7a5e;
-  --dieL:#fbf6ea; --dieL-pip:#1d1416; --dieP:#f3efe9; --dieP-pip:#1d1416; --die-edge:#3a2b2e;
-  --stripe:#f3ebe6; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#130d0f; --surface:#1d1517; --surface2:#271c1f; --ink:#f3ebe6; --muted:#b09ea0; --line:#3a2b2e;
-  --luci:#ff5b4d; --luci-soft:#3a1716; --dmetal:#f2b134; --dmetal-soft:#3a2c10; --dnerd:#45d69c; --dnerd-soft:#12301f;
-  --accent:#a98bff; --accent-ink:#160d2a; --good:#5cc47f; --bad:#ff7a5e;
-  --dieL:#fbf6ea; --dieL-pip:#1d1416; --dieP:#f3efe9; --dieP-pip:#1d1416; --die-edge:#3a2b2e;
-  --stripe:#f3ebe6; color-scheme:dark}
+
+
 body.mode-L{--thief:var(--dnerd);--thief-soft:var(--dnerd-soft);--police:var(--luci);--police-soft:var(--luci-soft)}
 /* Reward: Tema Cozy — maglione di lana e camomilla, un solo aspetto voluto */
 body.cozy{
@@ -931,7 +922,7 @@ function menu(){
      <p class="tagline">Il gioco ufficiale dei 40 anni di Daniele. Scegli il tuo personaggio: uno insegue Lucifero, l’altro scappa da lui.</p>
      <p class="muted" style="margin:0">Partite giocate: <b class="num">${P.games}</b> · vittorie: <b class="num">${P.wins}</b> · serie attuale: <b class="num">${P.streak}</b></p></div></header>
    <section class="panel">
-     <span class="lbl">Scegli il tuo Dani</span>
+     <span class="lbl">Scegli il tuo Daniele preferito</span>
      <div class="seg" id="roles">
        <button class="opt P" data-r="P"><span class="who">Dani il Metallaro</span><small>Insegui Lucifero: deve entrare nella tua band Brutal Cozy Metal. Accumuli Entusiasmo.</small></button>
        <button class="opt L" data-r="L"><span class="who">Dani il Nerd</span><small>Scappi da Lucifero: vuole a ogni costo sfidarti a Mario Kart. Accumuli Scuse e vinci solo se superi il suo Assillo.</small></button></div>
@@ -945,7 +936,7 @@ function menu(){
    <section class="panel resume" id="resume" hidden><span class="lbl">Partita interrotta</span><p style="margin:0"></p>
      <div class="row"><button class="btn primary" id="res-go">Riprendi la partita</button><button class="btn" id="res-no">Scartala</button></div></section>
    <section class="panel"><details ${P.games===0?'open':''}><summary>Come si gioca</summary><ol class="howto">
-     <li>Scegli il tuo Dani: il Metallaro insegue, il Nerd scappa. Il computer gioca la parte di Lucifero.</li>
+     <li>Scegli il tuo Daniele preferito: il Metallaro insegue, il Nerd scappa. Il computer gioca la parte di Lucifero.</li>
      <li>La partita ha due fasi da tre round. In ogni round lanciate i dadi: 4 a testa, 5 per chi è indietro. Puoi rilanciare quanti dadi vuoi, ma una volta sola.</li>
      <li>Il Ladro assegna i suoi dadi: 1 ai punti Fuga, 1 o 2 alla Difesa e 1 all’Esposizione, che passa alla Polizia capovolto (il 6 diventa 1).</li>
      <li>La Polizia assegna 1 dado all’Inseguimento e tanti dadi Sparatoria quanti sono i dadi Difesa. Può dichiarare una Raffica per avere un dado in più, ma perde 2 punti in quel round.</li>
