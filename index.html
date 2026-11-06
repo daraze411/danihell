@@ -1,0 +1,1028 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>DANIHELL</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Jost:wght@400;500;600;700&display=swap">
+
+<style>
+/* Layout: una colonna da tavolo da gioco notturno — tabellone in alto, piano di lancio al centro, verbale in fondo */
+/* Layout: tavolo da gioco sulla Croisette, 1955 — tabellone in alto, piano di lancio al centro, verbale in fondo.
+   Giorno: lavanda di Provenza per il Ladro, verde del mare per la Polizia, mimosa per le azioni. Notte: i fuochi d'artificio. */
+/* Layout: un palco da tavolo — locandina del concerto in alto, piano di lancio al centro, verbale in fondo.
+   Ogni personaggio ha il suo colore: Lucifero rosso brace, Dani Metallaro ottone da amplificatore, Dani Nerd verde da schermo. */
+:root{
+  --bg:#efeae6; --surface:#fbf8f6; --surface2:#e6dfda; --ink:#1d1416; --muted:#6a5a5c; --line:#d3c7c2;
+  --luci:#b3201a; --luci-soft:#f4d9d5; --dmetal:#8a5a00; --dmetal-soft:#f3e6c6; --dnerd:#137a55; --dnerd-soft:#d3eee2;
+  --thief:var(--luci); --thief-soft:var(--luci-soft); --police:var(--dmetal); --police-soft:var(--dmetal-soft);
+  --accent:#6d3fd6; --accent-ink:#ffffff; --good:#2b8150; --bad:#b8452f;
+  --dieL:#fffdf8; --dieL-pip:#1d1416; --dieP:#ffffff; --dieP-pip:#1d1416; --die-edge:#cbbdb7;
+  --stripe:#1d1416;
+  --display:"Metal Mania","Impact","Haettenschweiler",fantasy;
+  --body:"Jost","Futura","Century Gothic",system-ui,sans-serif;
+  --label:"Jost","Futura","Century Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#130d0f; --surface:#1d1517; --surface2:#271c1f; --ink:#f3ebe6; --muted:#b09ea0; --line:#3a2b2e;
+  --luci:#ff5b4d; --luci-soft:#3a1716; --dmetal:#f2b134; --dmetal-soft:#3a2c10; --dnerd:#45d69c; --dnerd-soft:#12301f;
+  --accent:#a98bff; --accent-ink:#160d2a; --good:#5cc47f; --bad:#ff7a5e;
+  --dieL:#fbf6ea; --dieL-pip:#1d1416; --dieP:#f3efe9; --dieP-pip:#1d1416; --die-edge:#3a2b2e;
+  --stripe:#f3ebe6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#130d0f; --surface:#1d1517; --surface2:#271c1f; --ink:#f3ebe6; --muted:#b09ea0; --line:#3a2b2e;
+  --luci:#ff5b4d; --luci-soft:#3a1716; --dmetal:#f2b134; --dmetal-soft:#3a2c10; --dnerd:#45d69c; --dnerd-soft:#12301f;
+  --accent:#a98bff; --accent-ink:#160d2a; --good:#5cc47f; --bad:#ff7a5e;
+  --dieL:#fbf6ea; --dieL-pip:#1d1416; --dieP:#f3efe9; --dieP-pip:#1d1416; --die-edge:#3a2b2e;
+  --stripe:#f3ebe6; color-scheme:dark}
+body.mode-L{--thief:var(--dnerd);--thief-soft:var(--dnerd-soft);--police:var(--luci);--police-soft:var(--luci-soft)}
+/* Reward: Tema Cozy — maglione di lana e camomilla, un solo aspetto voluto */
+body.cozy{
+  --bg:#ead9c2; --surface:#f6ead8; --surface2:#efdcc1; --ink:#3a2418; --muted:#7a5a44; --line:#d4b896;
+  --luci:#a8321a; --luci-soft:#f0cdb4; --dmetal:#8a5a00; --dmetal-soft:#f1dcae; --dnerd:#2f6b45; --dnerd-soft:#d4e3c4;
+  --accent:#b5562b; --accent-ink:#fff6ea; --dieL:#fff6e6; --dieP:#fff6e6; --die-edge:#c9a77e; --stripe:#3a2418; color-scheme:light}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 40px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{text-wrap:balance;margin:0}
+button{font:inherit;color:inherit}
+.btn{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:11px 16px;
+  font-family:var(--label);font-weight:700;font-size:17px;letter-spacing:.03em;cursor:pointer;min-height:44px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:disabled{opacity:.4;cursor:not-allowed}
+.btn:focus-visible,.die:focus-visible,.zone:focus-visible,.chip:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.muted{color:var(--muted)}
+.lbl{font-family:var(--label);font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:13px;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+/* Hero */
+.hero{display:flex;flex-direction:column;gap:6px;padding-top:8px}
+.hero.withposter{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:22px;align-items:end}
+.hero.withposter .htext{display:flex;flex-direction:column;gap:10px;min-width:0;padding-bottom:6px}
+@media (max-width:640px){.hero.withposter{grid-template-columns:1fr}.hero.withposter .poster{max-width:380px}}
+.poster{width:100%;max-width:340px;height:auto;display:block;filter:drop-shadow(0 10px 18px rgba(0,0,0,.28)) drop-shadow(0 2px 3px rgba(0,0,0,.25));transform:rotate(-1.2deg)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.tagline{font-family:var(--display);font-style:italic;font-weight:600;font-size:clamp(22px,4.5vw,30px);line-height:1.15;margin:0}
+.hero h1{font-family:var(--display);font-weight:800;font-style:italic;font-size:clamp(46px,12vw,84px);line-height:.92;letter-spacing:-.01em}
+.hero h1 .al{font-weight:500;font-size:.6em}
+.marin{height:22px;background:repeating-linear-gradient(180deg,var(--stripe) 0 4px,transparent 4px 9px);border-radius:3px;opacity:.9}
+.credit{font-family:var(--label);text-transform:uppercase;letter-spacing:.22em;font-size:12px;color:var(--muted)}
+.hero h1 .l{color:var(--thief)} .hero h1 .p{color:var(--police)}
+.tape{display:inline-block;align-self:flex-start;background:var(--accent);color:var(--accent-ink);font-family:var(--label);
+  font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:13px;padding:3px 10px;transform:rotate(-1.5deg)}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.opt{border:2px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface2);cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:2px}
+.opt b{font-family:var(--label);font-size:18px;letter-spacing:.02em}
+.opt small{color:var(--muted);font-size:13px}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--surface)}
+.opt.L[aria-pressed="true"]{border-color:var(--thief)} .opt.P[aria-pressed="true"]{border-color:var(--police)}
+.opt:disabled{opacity:.45;cursor:not-allowed}
+
+/* Scoreboard */
+.board{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:stretch}
+.side{border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:0;min-width:0}
+.side.L{background:var(--thief-soft)} .side.P{background:var(--police-soft);text-align:right}
+.side .score{font-family:var(--display);font-weight:800;font-style:italic;font-size:46px;line-height:1}
+.side.L .score{color:var(--thief)} .side.P .score{color:var(--police)}
+.side .who{font-size:13px;color:var(--muted)}
+.mid{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 4px}
+.mid b{font-family:var(--label);font-size:18px}
+.mid .lbl{font-size:12px}
+.held{display:flex;gap:6px;flex-wrap:wrap;font-size:13px}
+.held span{border:1px dashed var(--line);border-radius:6px;padding:1px 6px}
+
+/* Stage */
+.stage h2{font-family:var(--label);font-weight:700;font-size:22px;letter-spacing:.02em}
+.stage .who-L{color:var(--thief)} .stage .who-P{color:var(--police)}
+.tray{display:flex;flex-wrap:wrap;gap:10px;min-height:60px;align-items:center}
+
+.die{--sz:54px;width:var(--sz);height:var(--sz);border-radius:11px;border:1px solid var(--die-edge);display:grid;
+  grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:8px;gap:2px;position:relative;
+  box-shadow:0 2px 0 var(--die-edge);cursor:pointer;flex:0 0 auto;background:var(--dieL);transition:transform .15s}
+.die.L{background:var(--dieL)} .die.L i{background:var(--dieL-pip)}
+.die.P{background:var(--dieP)} .die.P i{background:var(--dieP-pip)}
+.die i{border-radius:50%;width:78%;height:78%;place-self:center;visibility:hidden}
+.die i.on{visibility:visible}
+.die.d10{display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%);border-radius:0;box-shadow:none}
+.die.d10 span{font-family:var(--label);font-weight:700;font-size:22px;color:var(--dieP-pip);margin-top:8px}
+.die.expo{outline:2px dashed var(--thief);outline-offset:2px}
+.die.sel{transform:translateY(-6px);box-shadow:0 0 0 3px var(--accent)}
+.die.rr{transform:rotate(12deg);opacity:.55}
+.die.static{cursor:default}
+.die.reduced::after{content:"−";position:absolute;top:-8px;right:-8px;background:var(--accent);color:var(--accent-ink);border-radius:50%;width:18px;height:18px;font-size:14px;line-height:18px;text-align:center;font-weight:700}
+.die.sm{--sz:34px;padding:5px;border-radius:7px}
+.die.sm.d10 span{font-size:15px;margin-top:5px}
+@keyframes tumble{0%{transform:rotate(-30deg) scale(.7);opacity:.2}100%{transform:none;opacity:1}}
+.die.new{animation:tumble .35s ease-out}
+@media (prefers-reduced-motion:reduce){.die,.die.new{animation:none;transition:none}}
+body.infernal .die:not(.d10){background:linear-gradient(145deg,#2a1214,#0b0607);border-color:#ff5b4d;box-shadow:0 2px 0 #7a1712}
+body.infernal .die:not(.d10) i{background:#ff5b4d}
+
+.zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.zone{border:2px dashed var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:104px;background:var(--surface2);cursor:pointer}
+.zone.target{border-color:var(--accent);border-style:solid}
+.zone .zh{display:flex;justify-content:space-between;gap:6px;align-items:baseline}
+.zone .zh b{font-family:var(--label);font-size:17px}
+.zone .zs{font-family:var(--display);font-size:24px}
+.zone .slots{display:flex;flex-wrap:wrap;gap:8px}
+.zone .slotdie{display:flex;flex-direction:column;align-items:center;gap:4px}
+.mini{border:1px solid var(--line);background:var(--surface);border-radius:6px;font-size:12px;padding:1px 8px;cursor:pointer;font-family:var(--label);font-weight:700}
+.err{color:var(--bad);font-weight:600;min-height:1.4em;font-size:15px}
+
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.summary div{background:var(--surface2);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column}
+.summary b{font-family:var(--display);font-size:26px;line-height:1.1}
+
+/* Carte */
+.card{border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;border:2px solid var(--line);background:var(--surface2);max-width:100%}
+.card.L{border-color:var(--thief)} .card.P{border-color:var(--police)}
+.card h3{font-family:var(--label);font-size:21px}
+.card.L h3{color:var(--thief)} .card.P h3{color:var(--police)}
+.card p{margin:0;font-size:15px}
+
+/* Verbale */
+.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;max-height:240px;overflow:auto;font-size:14px}
+.log li{border-left:3px solid var(--line);padding-left:8px}
+.log li.L{border-color:var(--thief)} .log li.P{border-color:var(--police)} .log li.S{border-color:var(--accent)}
+
+/* Dossier */
+.dossiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px}
+.dossier{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.dossier header{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.dossier h3{font-family:var(--label);font-size:20px}
+.stamp{font-family:var(--label);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;border:2px solid currentColor;padding:1px 7px;border-radius:4px;transform:rotate(-3deg);white-space:nowrap}
+.stamp.ok{color:var(--good)} .stamp.no{color:var(--muted)}
+.ach{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:14px}
+.ach .chk{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:12px}
+.ach.done .chk{background:var(--good);border-color:var(--good);color:#fff}
+.ach .t b{display:block;font-family:var(--label);font-size:15px}
+.ach .t span{color:var(--muted);font-size:13px}
+.bar{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-top:3px}
+.bar i{display:block;height:100%;background:var(--accent)}
+.reward{font-size:14px;background:var(--surface2);border-radius:8px;padding:6px 10px}
+
+/* Film */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface2);border-radius:999px;padding:6px 12px;font-family:var(--label);font-weight:600;cursor:pointer;font-size:15px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.films{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.films li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.films .y{font-family:var(--display);font-size:20px;color:var(--accent);min-width:3.2em}
+.films .t{min-width:0}
+.films .t b{display:block}
+.films .t span{color:var(--muted);font-size:14px}
+.films a{color:var(--police);font-size:14px;font-weight:600}
+.films .seen{opacity:.55}
+.films input{width:20px;height:20px;accent-color:var(--good)}
+.pick{border:2px solid var(--accent);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:2px}
+
+.foot{max-width:760px;margin:28px auto 0;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--muted)}
+.foot p{margin:0;max-width:65ch}
+.foot a{color:var(--ink)}
+.foot .sig{font-family:var(--display);font-style:italic;font-weight:700;font-size:22px;color:var(--ink);letter-spacing:.02em}
+.calc{border:2px solid var(--ink);border-radius:12px;background:var(--surface);display:flex;flex-direction:column;overflow:hidden}
+.calc .ch{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;background:var(--ink);color:var(--bg)}
+.calc .ch .lbl{color:var(--bg)}
+.calc .cs{padding:4px 12px 8px;display:flex;flex-direction:column}
+.calc .cs+.cs{border-top:1px dashed var(--line)}
+.calc .cs>.lbl{padding-top:6px}
+.crow{display:grid;grid-template-columns:minmax(6.5em,auto) 1fr auto;gap:10px;align-items:baseline;padding:5px 0;font-variant-numeric:tabular-nums}
+.crow+.crow{border-top:1px solid var(--surface2)}
+.crow span:first-child{font-family:var(--label);font-weight:600}
+.crow .f{color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.crow b{font-family:var(--label);font-size:19px;text-align:right;white-space:nowrap}
+.crow b.L{color:var(--thief)} .crow b.P{color:var(--police)} .crow b.neg{color:var(--bad)}
+.crow.tot{font-size:17px} .crow.tot b{font-size:24px}
+body.nocalc .calc{display:none}
+.calctog{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;font-family:var(--label);font-weight:700;font-size:13px;cursor:pointer;margin-top:4px;white-space:nowrap}
+.calctog[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+details summary{cursor:pointer;font-family:var(--label);font-weight:700;font-size:17px}
+.howto{margin:8px 0 0;padding-left:22px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+details ul{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:15px}
+.toast{background:var(--good);color:#fff;border-radius:10px;padding:10px 14px;font-weight:600}
+.result h2{font-family:var(--display);font-weight:800;font-style:italic;font-size:clamp(34px,9vw,54px);line-height:1}
+
+.die.L i{background:var(--thief)} .die.P i{background:var(--police)} .die.d10 span{color:var(--police)}
+.side .score,.hero h1,.result h2,.summary b,.zone .zs{font-style:normal;font-weight:400}
+.tagline{font-family:var(--body);font-style:normal;font-weight:600}
+.hero h1{letter-spacing:.01em}
+.opt .who{font-family:var(--display);font-size:26px;font-weight:400;line-height:1}
+.opt.L .who{color:var(--dnerd)} .opt.P .who{color:var(--dmetal)}
+.opt.L[aria-pressed="true"]{border-color:var(--dnerd)} .opt.P[aria-pressed="true"]{border-color:var(--dmetal)}
+.qr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center}
+@media (max-width:520px){.qr{grid-template-columns:1fr}}
+.qrbox{background:#fff;padding:10px;border-radius:10px;width:max-content;max-width:100%}
+.qrbox img,.qrbox canvas{display:block;width:180px;height:180px}
+.url{font-family:var(--label);font-size:14px;overflow-wrap:anywhere;background:var(--surface2);border-radius:8px;padding:6px 10px;user-select:all}
+.setlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.setlist li{display:grid;grid-template-columns:2.2em minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line)}
+.setlist .n{font-family:var(--display);font-size:22px;color:var(--luci)}
+.setlist .d{font-variant-numeric:tabular-nums;color:var(--muted)}
+</style>
+
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+
+<script>
+/* ===================== Dati ===================== */
+const CARDS={
+ P:[
+  {id:'posto',n:'Posto di blocco',q:'All’inizio di un round, prima del lancio del Ladro.',e:'In questo round il valore complessivo della Difesa non può superare 3.'},
+  {id:'rinforzi',n:'Rinforzi tattici',q:'Dopo le assegnazioni del Ladro, prima del lancio della Polizia.',e:'In questo round la Polizia lancia un dado in più.'},
+  {id:'tiratore',n:'Tiratore scelto',q:'Dopo le assegnazioni del Ladro, prima del lancio della Polizia.',e:'In questo round il dado Esposizione non viene capovolto.'},
+  {id:'supporto',n:'Supporto aereo',q:'Dopo le assegnazioni del Ladro, prima del lancio della Polizia.',e:'Aggiungi alla Sparatoria metà del dado Fuga più alto del Ladro, arrotondata per eccesso.'},
+  {id:'motore',n:'Motore potenziato',q:'Dopo le assegnazioni del Ladro, prima del lancio della Polizia.',e:'In questo round uno dei tuoi dadi a sei facce diventa un dado a dieci facce.'},
+  {id:'fuoco',n:'Fuoco di copertura',q:'Dopo le assegnazioni del Ladro, prima del lancio della Polizia.',e:'In questo round puoi dichiarare una Raffica senza ridurre l’Inseguimento.'}],
+ L:[
+  {id:'rifugio',n:'Rifugio segreto',q:'Subito dopo aver perso punti Fuga in un round.',e:'Recuperi fino a 3 dei punti Fuga appena persi.'},
+  {id:'moto',n:'Moto veloce',q:'All’inizio del primo o del secondo round, prima del tuo lancio.',e:'Due dadi di valore diverso alla Fuga (sommati), un solo dado alla Difesa, uno all’Esposizione.'},
+  {id:'basista',n:'Basista informato',q:'All’inizio di un round, prima del lancio della Polizia.',e:'La Polizia agisce per prima: 1 Inseguimento e 2 Sparatoria (3 con Raffica), senza Esposizione. Poi tu assegni 1 Fuga e 2 Difesa.'},
+  {id:'falsa',n:'Falsa pista',q:'In un round, dopo il tuo lancio e l’eventuale rilancio.',e:'Aumenti di 3 uno dei tuoi dadi, senza superare 6.'},
+  {id:'sabot',n:'Sabotaggio',q:'All’inizio di un round, prima del tuo lancio.',e:'In questo round la Polizia non può rilanciare.'},
+  {id:'regalo',n:'Regalo esplosivo',q:'All’inizio di un round, prima del tuo lancio.',e:'Il tuo dado Fuga vale zero, puoi rilanciare un solo dado, se la Difesa supera la Sparatoria la Polizia perde il doppio, niente Raffica.'}]
+};
+
+/* ===================== Vocabolario dei due mondi ===================== */
+let MODE='P';
+const VOC={
+ P:{name:{P:'Daniele',L:'Lucifero'},
+    t:{Fuga:'Latitanza',Difesa:'Noncuranza',Esposizione:'Curiosità',Inseguimento:'Entusiasmo',Sparatoria:'Megariff',Raffica:'Doppia cassa',Rapido:'Assolo su una corda',Disperato:'Crowd surfing'},
+    cards:{posto:'Nostalgia WinAmp',rinforzi:'Ma quanto è bello il sax nel black metal?',tiratore:'Pogo educato',supporto:'Muro di amplificatori',motore:'Chitarra a sette corde',fuoco:'Blast beat',
+           rifugio:'Forcone dall’arrotino',moto:'Disco Inferno',basista:'Playlist su Spotify craccato',falsa:'Impegno inventato',sabot:'Cavo di Temu difettoso',regalo:'Plettro maledetto'}},
+ L:{name:{L:'Daniele',P:'Lucifero'},
+    t:{Fuga:'Scusa',Difesa:'Modalità aereo',Esposizione:'Spunta blu',Inseguimento:'Assillo',Sparatoria:'Pressione',Raffica:'Guscio blu',Rapido:'Ghosting',Disperato:'Rage quit'},
+    cards:{posto:'Let’s-a-go!',rinforzi:'Il fascino discreto del multiplayer',tiratore:'Ti vedo online',supporto:'Gruppo WhatsApp',motore:'Controller pro',fuoco:'Pizza Diavola',
+           rifugio:'Salvataggio rapido',moto:'Gameplay su YouTube',basista:'Zelda monella',falsa:'Batteria al 3%',sabot:'Maledetto Wi-Fi!',regalo:'Ho una bruschetta in un occhio'}}
+};
+let RULES=[];
+function buildRules(){
+  const v=VOC[MODE],n=v.name,t=v.t,R=[];
+  R.push([/\b[Ii]l Ladro\b/g,n.L],[/\bal Ladro\b/g,'a '+n.L],[/\bdel Ladro\b/g,'di '+n.L],[/\bdal Ladro\b/g,'da '+n.L],[/\bLadro\b/g,n.L]);
+  R.push([/\b[Ll]a Polizia\b/g,n.P],[/\b([Aa])lla Polizia\b/g,'$1 '+n.P],[/\b([Dd])ella Polizia\b/g,'$1i '+n.P],[/\b([Dd])alla Polizia\b/g,'$1a '+n.P],[/\bPolizia\b/g,n.P]);
+  R.push([/\b(l|L|dell|Dell|all|All|nell|Nell|dall|Dall|sull|Sull)[’']Esposizione\b/g,'$1a '+t.Esposizione],[/\b([Uu])n[’']Esposizione\b/g,'$1na '+t.Esposizione]);
+  const masc=(src,dst)=>R.push([new RegExp('\\b([Uu])na '+src+'\\b','g'),'$1n '+dst],[new RegExp('\\bla '+src+'\\b','g'),'il '+dst],[new RegExp('\\bLa '+src+'\\b','g'),'Il '+dst],
+    [new RegExp('\\b(dell|all|nell|dall|sull)a '+src+'\\b','gi'),(m,a)=>a.slice(0,-1)+' '+dst]);
+  if(MODE==='L')masc('Raffica','Guscio blu');
+  if(MODE==='P')masc('Sparatoria','Megariff');
+  R.push([/\bper prima\b/g,'per primo']);
+  for(const [k,w] of Object.entries(t))R.push([new RegExp('\\b'+k+'\\b','g'),w]);
+  RULES=R;
+}
+function tr(s){for(const [re,w] of RULES)s=s.replace(re,w);return s}
+function trNode(node){
+  if(node.nodeType===3){const a=node.nodeValue,b=tr(a);if(a!==b)node.nodeValue=b;return}
+  if(node.nodeType!==1||node.closest('script,style,svg'))return;
+  const w=document.createTreeWalker(node,NodeFilter.SHOW_TEXT,{acceptNode:x=>x.parentElement&&x.parentElement.closest('svg')?2:1});let x;
+  while((x=w.nextNode())){const a=x.nodeValue,b=tr(a);if(a!==b)x.nodeValue=b}
+  node.querySelectorAll('[aria-label]').forEach(e=>{const a=e.getAttribute('aria-label'),b=tr(a);if(a!==b)e.setAttribute('aria-label',b)});
+}
+function setMode(m){MODE=m;buildRules();CARDS.L.forEach(c=>c.n=VOC[m].cards[c.id]);CARDS.P.forEach(c=>c.n=VOC[m].cards[c.id]);
+  document.body.classList.toggle('mode-L',m==='L');document.body.classList.toggle('mode-P',m==='P')}
+const cardById=id=>[...CARDS.P,...CARDS.L].find(c=>c.id===id);
+
+const DOSSIERS=[
+ {name:'Meshuggah',reward:'Modalità Esperti',items:[
+  ['Soundcheck','Completa una partita',p=>[p.games,1]],
+  ['Chiodo e borchie','Gioca una volta da Dani il Metallaro',p=>[p.gamesP,1]],
+  ['Occhiali e controller','Gioca una volta da Dani il Nerd',p=>[p.gamesL,1]],
+  ['Headbanging','Vinci una partita',p=>[p.wins,1]],
+  ['Tanto headbanging','Completa tre partite',p=>[p.games,3]]]},
+ {name:'Roadburn',reward:'Dadi infernali',items:[
+  ['Niente Mario Kart','Vinci da Dani il Nerd',p=>[p.winsL,1]],
+  ['Band formata','Vinci da Dani il Metallaro',p=>[p.winsP,1]],
+  ['Doppio album','Completa una partita completa',p=>[p.fullGames,1]],
+  ['Plettro nella manica','Usa una carta azione',p=>[p.cardsUsed,1]],
+  ['A cena con Lara Croft','Vinci tre partite',p=>[p.wins,3]]]},
+ {name:'Nervi d’acciaio',reward:'Tema Cozy',items:[
+  ['Dieci lunghezze','Vinci con almeno 10 punti di distacco',p=>[p.bigWins,1]],
+  ['Uno basta','Usa un 1 in un dado di difesa o di attacco',p=>[p.ones,1]],
+  ['Vittoria al minimo','Vinci dopo aver fallito un Disperato nel confronto di fine fase',p=>[p.minWins,1]],
+  ['Carta nel cassetto','Vinci 3 volte senza usare la carta pescata',p=>[p.drawerWins,3]],
+  ['Senza aiuti','Vinci una partita completa senza usare carte',p=>[p.cleanFullWins,1]]]},
+ {name:'Leggenda dei 40',reward:'Bonus track: la setlist',items:[
+  ['Quaranta','Gioca 40 partite',p=>[p.games,40]],
+  ['Re delle scuse','Vinci 5 volte da Nerd in modalità Esperti',p=>[p.expWinsL,5]],
+  ['Star','Vinci 5 volte da Metallaro in modalità Esperti',p=>[p.expWinsP,5]],
+  ['Nessun doppione','Vinci in modalità Esperti senza mai usare un 6',p=>[p.no6Wins,1]],
+  ['Striscia vincente','Vinci 5 partite consecutive',p=>[p.bestStreak,5]]]}
+];
+
+const PKEY='dani-vs-lucifero-profilo';
+const BASE={games:0,gamesL:0,gamesP:0,wins:0,winsL:0,winsP:0,fullGames:0,cardsUsed:0,bigWins:0,ones:0,minWins:0,
+  drawerWins:0,cleanFullWins:0,streak:0,bestStreak:0,expWinsL:0,expWinsP:0,no6Wins:0,prefs:{dice:'std',theme:'base'},
+  last:{role:'P',mode:'full'}};
+let P=load();
+function load(){try{const s=JSON.parse(localStorage.getItem(PKEY)||'null');return Object.assign(structuredClone(BASE),s||{})}catch(e){return structuredClone(BASE)}}
+function save(){try{localStorage.setItem(PKEY,JSON.stringify(P))}catch(e){}}
+const achDone=(it)=>{const [c,t]=it[2](P);return c>=t};
+const dossierDone=i=>DOSSIERS[i].items.every(achDone);
+function applyPrefs(){
+  document.body.classList.toggle('infernal',P.prefs.dice==='infernal'&&dossierDone(1));
+  document.body.classList.toggle('cozy',P.prefs.theme==='cozy'&&dossierDone(2));
+  document.body.classList.toggle('nocalc',P.prefs.calc===false);
+}
+
+/* ===================== Utilità ===================== */
+const app=document.getElementById('app');
+const rnd=s=>1+Math.floor(Math.random()*s);
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+function dieHTML(d,cls='',attrs=''){
+  const side=d.side||'L';
+  if(d.sides===10) return `<div class="die d10 ${side} ${cls}" ${attrs} aria-label="dado a dieci facce: ${d.v}"><span>${d.v}</span></div>`;
+  const on=PIPS[d.v]||[];
+  let cells='';for(let i=0;i<9;i++)cells+=`<i class="${on.includes(i)?'on':''}"></i>`;
+  return `<div class="die ${side} ${d.expo?'expo':''} ${cls}" ${attrs} aria-label="dado: ${d.v}">${cells}</div>`;
+}
+const diceRow=(vals,side,cls='sm')=>vals.map(v=>dieHTML({v,side,sides:v>6?10:6},cls+' static')).join('');
+const NAME={get L(){return VOC[MODE].name.L},get P(){return VOC[MODE].name.P}};
+
+/* ===================== Stato partita ===================== */
+let G=null;
+function opp(s){return s==='L'?'P':'L'}
+function isHuman(s){return G.human===s}
+function log(t,c=''){G.log.unshift({t,c});renderLog()}
+
+function shell(){
+  app.innerHTML=`
+  
+  <section class="board" id="board"></section>
+  <section class="panel stage" id="stage" aria-live="polite"></section>
+  <section class="panel"><div class="row" style="justify-content:space-between"><span class="lbl">Verbale</span>
+    <button class="mini" id="quit">Abbandona partita</button></div><ul class="log" id="log"></ul></section>`;
+  document.getElementById('quit').onclick=()=>{G.abort=true;G=null;menu()};
+}
+function renderBoard(){
+  const b=document.getElementById('board');if(!b||!G)return;
+  const ph=G.mode==='travel'?'Partita da viaggio':`Fase ${G.phase} di 2`;
+  const rd=G.stage==='end'?'Partita conclusa':G.stage==='conf'?(G.final?'Confronto finale':'Confronto di fine fase'):G.stage==='draw'?'Pesca delle carte':`Round ${G.round} di 3`;
+  const held=s=>{const c=G.cards[s];if(!c)return '';if(G.used[s])return `<span>${esc(cardById(c).n)} ✓</span>`;
+    return isHuman(s)?`<span>${esc(cardById(c).n)}</span>`:`<span>carta coperta</span>`};
+  b.innerHTML=`
+   <div class="side L"><span class="lbl">Fuga</span><span class="score num">${G.F}</span>
+     <span class="who">Ladro · ${isHuman('L')?'tu':'CPU'}</span><div class="held">${held('L')}</div></div>
+   <div class="mid"><b>${rd}</b><span class="lbl">${ph}${G.expert?' · Esperti':''}</span>${calcBtn()}</div>
+   <div class="side P"><span class="lbl">Inseguimento</span><span class="score num">${G.I}</span>
+     <span class="who">Polizia · ${isHuman('P')?'tu':'CPU'}</span><div class="held" style="justify-content:flex-end">${held('P')}</div></div>`;
+}
+function calcBtn(){const on=P.prefs.calc!==false;return `<button class="calctog" data-calc aria-pressed="${on}">Calcoli: ${on?'sì':'no'}</button>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-calc]');if(!b)return;
+  P.prefs.calc=P.prefs.calc===false;save();applyPrefs();
+  document.querySelectorAll('[data-calc]').forEach(x=>{const on=P.prefs.calc!==false;x.setAttribute('aria-pressed',on);x.textContent=`Calcoli: ${on?'sì':'no'}`})});
+const crow=(l,f,r,c='')=>`<div class="crow ${c.includes('tot')?'tot':''}"><span>${l}</span><span class="f">${f}</span><b class="${c}">${r}</b></div>`;
+const csec=(t,rows)=>`<div class="cs"><span class="lbl">${t}</span>${rows.join('')}</div>`;
+const calcBox=secs=>`<div class="calc"><div class="ch"><span class="lbl">Dettaglio dei calcoli</span>${calcBtn()}</div>${secs.join('')}</div>`;
+function renderLog(){const l=document.getElementById('log');if(!l)return;
+  l.innerHTML=G.log.slice(0,40).map(x=>`<li class="${x.c}">${x.t}</li>`).join('')}
+
+/* Promessa su uno schermo */
+function ui(html,bind){return new Promise(res=>{const st=document.getElementById('stage');st.innerHTML=html;renderBoard();bind(st,res)})}
+function pause(html,label='Continua'){return ui(html+`<div class="row"><button class="btn primary" id="ok">${label}</button></div>`,(st,res)=>{const b=st.querySelector('#ok');b.focus({preventScroll:true});b.onclick=()=>res()})}
+function choose(html,opts){return ui(html+`<div class="row">${opts.map((o,i)=>`<button class="btn ${i===0?'primary':''}" data-i="${i}">${o[1]}</button>`).join('')}</div>`,
+  (st,res)=>st.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>res(opts[+b.dataset.i][0])))}
+const cardHTML=(id,side)=>{const c=cardById(id);return `<div class="card ${side}"><span class="lbl">Carta ${NAME[side]}</span><h3>${esc(c.n)}</h3><p><b>Quando:</b> ${esc(c.q)}</p><p><b>Effetto:</b> ${esc(c.e)}</p></div>`};
+
+/* ===================== Lancio ===================== */
+async function humanRoll(side,n,{maxRe=99,noRe=false,d10=false,extra=[],info=''}={}){
+  const dice=Array.from({length:n},(_,i)=>({id:i,v:0,sides:d10&&i===0?10:6,side}));
+  const who=`<h2 class="who-${side}">Il tuo lancio · ${NAME[side]}</h2>`;
+  await ui(`${who}${info}<p class="muted">Lanci ${n} dadi${d10?', uno dei quali a dieci facce':''}.</p><div class="row"><button class="btn primary" id="go">Lancia</button></div>`,
+    (st,res)=>{st.querySelector('#go').onclick=res});
+  dice.forEach(d=>d.v=rnd(d.sides));
+  if(noRe){
+    await pause(`${who}${info}<div class="tray">${dice.map(d=>dieHTML(d,'new static')).join('')}${extra.map(d=>dieHTML(d,'static')).join('')}</div><p class="muted">Sabotaggio: in questo round non puoi rilanciare.</p>`,'Assegna i dadi');
+    return dice;
+  }
+  const sel=new Set();
+  await ui('',(st,res)=>{
+    const draw=(first)=>{
+      st.innerHTML=`${who}${info}<p class="muted">Tocca i dadi da rilanciare (una sola volta${maxRe<99?`, massimo ${maxRe}`:''}), oppure tienili.</p>
+       <div class="tray">${dice.map(d=>dieHTML(d,(first?'new ':'')+(sel.has(d.id)?'rr':''),`tabindex="0" role="button" data-id="${d.id}" aria-pressed="${sel.has(d.id)}"`)).join('')}${extra.map(d=>dieHTML(d,'static')).join('')}</div>
+       <div class="row"><button class="btn primary" id="keep">${sel.size?`Rilancia ${sel.size} ${sel.size===1?'dado':'dadi'}`:'Tieni così'}</button></div>`;
+      st.querySelectorAll('[data-id]').forEach(el=>{const t=()=>{const id=+el.dataset.id;
+        if(sel.has(id))sel.delete(id);else{if(sel.size>=maxRe)sel.clear();sel.add(id)}draw(false)};
+        el.onclick=t;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t()}}});
+      st.querySelector('#keep').onclick=()=>res();
+    };draw(true);
+  });
+  if(sel.size){dice.forEach(d=>{if(sel.has(d.id))d.v=rnd(d.sides)});
+    log(`Hai rilanciato ${sel.size} ${sel.size===1?'dado':'dadi'}.`,side)}
+  return dice;
+}
+function cpuRoll(side,n,{maxRe=99,noRe=false,d10=false}={}){
+  const dice=Array.from({length:n},(_,i)=>({id:i,v:0,sides:d10&&i===0?10:6,side}));
+  dice.forEach(d=>d.v=rnd(d.sides));
+  dice.first=dice.map(d=>d.v);dice.rer=[];dice.noRe=noRe;
+  if(!noRe){const low=dice.filter(d=>d.v<=(d.sides===10?5:3)).sort((a,b)=>a.v-b.v).slice(0,maxRe);
+    low.forEach(d=>{d.v=rnd(d.sides);dice.rer.push(d.id)});if(low.length)log(`${NAME[side]} (CPU) rilancia ${low.length} ${low.length===1?'dado':'dadi'}.`,side)}
+  return dice;
+}
+/* Racconto delle mosse della CPU */
+function rollStory(dice,side){
+  const rr=dice.rer||[];
+  let h=`<div class="row"><span class="lbl">Primo lancio</span>${dice.first.map((v,i)=>dieHTML({v,side,sides:dice[i].sides},'sm static'+(rr.includes(i)?' rr':''))).join('')}</div>`;
+  h+=rr.length?`<div class="row"><span class="lbl">Rilancia ${rr.length} ${rr.length===1?'dado':'dadi'} → risultato</span>${dice.map(d=>dieHTML(d,'sm static')).join('')}</div>`
+     :`<p class="muted">${dice.noRe?'Non può rilanciare.':'Nessun rilancio: tiene tutti i dadi.'}</p>`;
+  return h;
+}
+function assignStory(a,zones,dice,side){
+  const used=new Set();
+  const rows=zones.map(z=>{const ds=a[z.key];ds.forEach(d=>used.add(d.id));
+    const red=ds.filter(d=>!d.expo).map(d=>{const o=dice.find(x=>x.id===d.id);return o&&o.v!==d.v?`${o.v}→${d.v}`:null}).filter(Boolean);
+    return `<div class="row"><b style="min-width:7.5em">${z.label}</b>${ds.map(d=>dieHTML(d,'sm static')).join('')}<b class="num">= ${sum(ds.map(d=>d.v))}</b>${red.length?`<span class="muted">ridotto ${red.join(', ')}</span>`:''}${ds.some(d=>d.expo)?'<span class="muted">(Esposizione)</span>':''}</div>`});
+  const unused=dice.filter(d=>!used.has(d.id)&&!d.expo);
+  if(unused.length)rows.push(`<div class="row"><span class="lbl" style="min-width:7.5em">Inutilizzati</span>${unused.map(d=>dieHTML(d,'sm static')).join('')}</div>`);
+  return `<div style="display:flex;flex-direction:column;gap:8px">${rows.join('')}</div>`;
+}
+function cpuPanel(side,title,body){
+  return pause(`<h2 class="who-${side}">${title}</h2><div class="panel" style="background:var(--${side==='L'?'thief':'police'}-soft);border:0">${body}</div>`);
+}
+
+/* ===================== Assegnazione ===================== */
+function humanAssign({side,dice,zones,validate,info=''}){
+  prepRelax(dice,zones,validate);
+  return ui('',(st,res)=>{
+    const place={},val={};dice.forEach(d=>{val[d.id]=d.v;place[d.id]=null});
+    let sel=null;
+    const build=()=>{const a={};zones.forEach(z=>a[z.key]=[]);dice.forEach(d=>{if(place[d.id])a[place[d.id]].push({...d,v:val[d.id]})});return a};
+    const draw=()=>{
+      const a=build(),err=validate(a);
+      const tray=dice.filter(d=>!place[d.id]);
+      const dz=d=>dieHTML({...d,v:val[d.id]},(sel===d.id?'sel ':'')+(val[d.id]<d.v?'reduced':''),`tabindex="0" role="button" data-id="${d.id}"`);
+      st.innerHTML=`<h2 class="who-${side}">Assegna i dadi · ${NAME[side]}</h2>${info}
+       <p class="muted">Tocca un dado, poi la zona in cui collocarlo. Tocca un dado già collocato per riportarlo indietro.${G.expert?' In modalità Esperti puoi ridurre un dado collocato con “−1”.':''}</p>
+       <div class="tray" aria-label="dadi da assegnare">${tray.map(dz).join('')||'<span class="muted">Tutti i dadi sono collocati. Quelli inutili puoi lasciarli qui.</span>'}</div>
+       <div class="zones">${zones.map(z=>{const ds=dice.filter(d=>place[d.id]===z.key);
+         return `<div class="zone ${sel!==null?'target':''}" tabindex="0" role="button" data-z="${z.key}">
+           <div class="zh"><b>${z.label}</b><span class="zs num">${sum(ds.map(d=>val[d.id]))}</span></div>
+           <span class="lbl">${z.hint}</span>
+           <div class="slots">${ds.map(d=>`<div class="slotdie">${dz(d)}${G.expert&&!d.expo&&val[d.id]>1?`<button class="mini" data-red="${d.id}">−1</button>`:''}</div>`).join('')}</div></div>`}).join('')}</div>
+       <div class="err">${err||''}</div>
+       <div class="row"><button class="btn primary" id="done" ${err?'disabled':''}>Conferma</button></div>`;
+      st.querySelectorAll('[data-id]').forEach(el=>{const t=e=>{e.stopPropagation();const id=isNaN(+el.dataset.id)?el.dataset.id:+el.dataset.id;
+        if(place[id]){place[id]=null;val[id]=dice.find(d=>d.id===id).v;sel=null}else sel=(sel===id?null:id);draw()};
+        el.onclick=t;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t(e)}}});
+      st.querySelectorAll('[data-z]').forEach(el=>{const t=()=>{if(sel===null)return;place[sel]=el.dataset.z;sel=null;draw()};
+        el.onclick=t;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t()}}});
+      st.querySelectorAll('[data-red]').forEach(b=>b.onclick=e=>{e.stopPropagation();const id=isNaN(+b.dataset.red)?b.dataset.red:+b.dataset.red;val[id]=Math.max(1,val[id]-1);draw()});
+      const done=st.querySelector('#done');done.onclick=()=>{if(!validate(build()))res(build())};
+    };draw();
+  });
+}
+function countErr(a,zones){
+  for(const z of zones){const n=a[z.key].length;
+    if(n<z.min||n>z.max)return z.min===z.max?`${z.label}: servono ${z.min} ${z.min===1?'dado':'dadi'}.`:`${z.label}: servono da ${z.min} a ${z.max} dadi.`}
+  return null;
+}
+function disjointErr(a,keys,skipExpo){
+  const seen={};for(const k of keys)for(const d of a[k]){if(skipExpo&&d.expo)continue;
+    if(seen[d.v]&&seen[d.v]!==k)return `Esperti: il valore ${d.v} compare in ruoli diversi.`;seen[d.v]=k}
+  return null;
+}
+function thiefZones(R){
+  if(R.basista)return [{key:'fuga',label:'Fuga',min:1,max:1,hint:'1 dado · punti Fuga'},{key:'dif',label:'Difesa',min:2,max:2,hint:'2 dadi · sommati'}];
+  if(R.moto)return [{key:'fuga',label:'Fuga',min:2,max:2,hint:'2 dadi diversi · sommati'},{key:'dif',label:'Difesa',min:1,max:1,hint:'1 dado'},{key:'expo',label:'Esposizione',min:1,max:1,hint:'1 dado · capovolto alla Polizia'}];
+  return [{key:'fuga',label:'Fuga',min:1,max:1,hint:'1 dado · punti Fuga'},{key:'dif',label:'Difesa',min:1,max:2,hint:'1 o 2 dadi · sommati'},{key:'expo',label:'Esposizione',min:1,max:1,hint:'1 dado · capovolto alla Polizia'}];
+}
+function thiefValidate(R,zones){return a=>{
+  const e=countErr(a,zones);if(e)return e;
+  if(R.moto&&!G.relax&&a.fuga[0].v===a.fuga[1].v)return 'Moto veloce: i due dadi Fuga devono avere valori diversi.';
+  if(G.expert&&!G.relax)return disjointErr(a,zones.map(z=>z.key),false);
+  return null}}
+function policeZones(need){return [{key:'ins',label:'Inseguimento',min:1,max:1,hint:'1 dado · punti Inseguimento'},{key:'spar',label:'Sparatoria',min:need,max:need,hint:`${need} ${need===1?'dado':'dadi'} · contro la Difesa`}]}
+function policeValidate(zones,dice){return a=>{
+  const e=countErr(a,zones);if(e)return e;
+  const ex=dice.find(d=>d.expo);if(ex&&![...a.ins,...a.spar].some(d=>d.expo))return 'Il dado Esposizione va usato in Inseguimento o Sparatoria.';
+  if(G.expert&&!G.relax)return disjointErr(a,['ins','spar'],true);
+  return null}}
+
+/* CPU: enumerazione delle assegnazioni */
+function enumerate(dice,zones){
+  const out=[],n=dice.length,idx=new Array(n).fill(-1);
+  (function rec(i){
+    if(i===n){const cnt=zones.map(()=>0);idx.forEach(z=>{if(z>=0)cnt[z]++});
+      if(zones.every((z,j)=>cnt[j]>=z.min&&cnt[j]<=z.max)){const a={};zones.forEach(z=>a[z.key]=[]);
+        idx.forEach((z,j)=>{if(z>=0)a[zones[z].key].push({...dice[j]})});out.push(a)}return}
+    for(let z=-1;z<zones.length;z++){if(dice[i].expo&&z===-1)continue;idx[i]=z;rec(i+1)}
+  })(0);return out;
+}
+function perms(a){return a.length<=1?[a]:a.flatMap((x,i)=>perms([...a.slice(0,i),...a.slice(i+1)]).map(p=>[x,...p]))}
+function expertFix(a,order){
+  const b={};for(const k in a)b[k]=a[k].map(d=>({...d}));
+  const used=new Set();
+  for(const k of order){const mine=new Set();for(const d of b[k]){if(d.expo)continue;let v=d.v;while(v>=1&&used.has(v))v--;if(v<1)return null;d.v=v;mine.add(v)}mine.forEach(v=>used.add(v))}
+  return b;
+}
+function bestOf(cands,score,validate,order){
+  let best=null,bs=-1e9;
+  for(const c of cands){const vars=G.expert?perms(order).map(o=>expertFix(c,o)).filter(Boolean):[c];
+    for(const v of vars){if(validate(v))continue;const s=score(v)+Math.random()*.01;if(s>bs){bs=s;best=v}}}
+  return best;
+}
+function prepRelax(dice,zones,val){G.relax=false;if(!bestOf(enumerate(dice,zones),()=>0,val,zones.map(z=>z.key)))G.relax=true;
+  if(G.relax)log('Nessuna assegnazione rispetta i vincoli con questi dadi: per questo round i vincoli sono sospesi.','S')}
+function cpuThief(dice,R){
+  const zones=thiefZones(R),val=thiefValidate(R,zones);prepRelax(dice,zones,val);
+  const score=a=>{
+    const f=R.regalo?0:sum(a.fuga.map(d=>d.v));let def=sum(a.dif.map(d=>d.v));if(R.posto)def=Math.min(def,3);
+    if(R.basista){const sp=R.pA.sparTot;let s=f;if(sp>def)s-=Math.min(G.F+f,sp-def);else s+=Math.min(G.I,(def-sp)*(R.regalo?2:1));return s}
+    const e=a.expo[0].v;return f+.85*(def-4.6*a.dif.length)+.35*e-(R.posto&&a.dif.length===2?1:0);
+  };
+  return bestOf(enumerate(dice,zones),score,val,zones.map(z=>z.key));
+}
+function cpuPolice(dice,R,need){
+  const zones=policeZones(need),val=policeValidate(zones,dice);prepRelax(dice,zones,val);
+  const score=a=>{let ins=a.ins[0].v;if(R.raffica&&!R.fuoco)ins=Math.max(0,ins-2);
+    const sp=sum(a.spar.map(d=>d.v))+R.supBonus;if(R.basista)return ins+sp*.9;
+    let def=R.defTot;let s=ins;if(sp>def)s+=Math.min(G.F+R.fugaGain,sp-def);else s-=Math.min(G.I+ins,(def-sp)*(R.regalo?2:1));return s};
+  return bestOf(enumerate(dice,zones),score,val,['ins','spar']);
+}
+
+/* ===================== Carte: finestre ===================== */
+function hasCard(s,id){return G.cards[s]===id&&!G.used[s]}
+function useCard(s){G.used[s]=true;const c=cardById(G.cards[s]);log(`${NAME[s]} gioca <b>${esc(c.n)}</b>.`,'S');
+  if(isHuman(s)){G.t.usedCard=true}}
+const lastRound=()=>G.phase===2&&G.round===3;
+async function askCard(s,extra=''){
+  return (await choose(`<h2>Vuoi giocare la tua carta?</h2>${extra}${cardHTML(G.cards[s],s)}`,[[true,'Gioca la carta'],[false,'Non ora']]));
+}
+async function startWindow(R){
+  // Polizia: Posto di blocco · Ladro: Moto veloce, Sabotaggio, Regalo esplosivo, Basista informato
+  const elig={P:hasCard('P','posto'),L:['sabot','regalo','basista'].some(id=>hasCard('L',id))||(hasCard('L','moto')&&G.round<=2)};
+  const want={P:false,L:false};
+  for(const s of ['L','P']){if(!elig[s])continue;
+    if(isHuman(s))want[s]=await askCard(s,'<p class="muted">Inizio del round: le carte giocate ora vengono rivelate insieme a quelle dell’avversario.</p>');
+    else want[s]=cpuStartCard(s,R);}
+  for(const s of ['L','P'])if(want[s]){useCard(s);R[G.cards[s]]=true}
+  if(want.L||want.P)await pause(`<h2>Carte rivelate</h2>${want.L?cardHTML(G.cards.L,'L'):''}${want.P?cardHTML(G.cards.P,'P'):''}`);
+}
+function cpuStartCard(s,R){
+  const c=G.cards[s];if(lastRound()&&c!=='moto'&&c!=='rifugio'&&c!=='falsa'&&c!=='rinforzi')return c!=='regalo'||G.F>G.I;
+  if(c==='posto')return G.round>=2||Math.random()<.4;
+  if(c==='moto')return G.round===1||G.round===2;
+  if(c==='sabot')return true;
+  if(c==='basista')return G.round>=2;
+  if(c==='regalo')return G.F>G.I+4;
+  return false;
+}
+async function policeWindow(R){
+  const ids=['tiratore','supporto','motore','fuoco','rinforzi'];const c=G.cards.P;
+  if(!c||G.used.P||!ids.includes(c))return;
+  let use;
+  if(isHuman('P'))use=await askCard('P',`<p class="muted">Il Ladro ha assegnato i dadi. Esposizione: ${R.tA.expo[0].v} · Fuga: ${R.tA.fuga.map(d=>d.v).join(' + ')}.</p>`);
+  else{const e=R.tA.expo[0].v,f=Math.max(...R.tA.fuga.map(d=>d.v));
+    use=lastRound()||(c==='tiratore'&&e>=5)||(c==='supporto'&&f>=5&&!R.regalo)||c==='motore'||c==='rinforzi'||(c==='fuoco'&&!R.regalo&&R.tA.dif.length>=1)}
+  if(c==='fuoco'&&R.regalo)use=false;
+  if(use){useCard('P');R[c]=true;if(!isHuman('P'))await pause(`<h2>La Polizia gioca una carta</h2>${cardHTML(c,'P')}`)}
+}
+
+/* ===================== Round ===================== */
+function diceCounts(){if(G.round===1||G.F===G.I)return {L:4,P:4};return G.F<G.I?{L:5,P:4}:{L:4,P:5}}
+function trackHuman(vals,where){if(where==='dif'||where==='spar'){if(vals.includes(1))G.t.one=true}if(vals.includes(6))G.t.six=true}
+
+async function playRound(){
+  const n=diceCounts();const R={nL:n.L,nP:n.P,supBonus:0};
+  log(`<b>Fase ${G.phase}, round ${G.round}</b> · dadi Ladro ${n.L}, Polizia ${n.P}.`,'S');
+  if(G.mode==='full'&&G.phase===2)await startWindow(R);
+  if(G.abort)return;
+  if(R.basista)await basistaRound(R);else await normalRound(R);
+  if(G.abort)return;
+  await resolveRound(R);
+}
+async function falsaPista(tD){
+  if(!hasCard('L','falsa'))return;
+  let i=-1;
+  if(isHuman('L')){
+    i=await ui(`<h2 class="who-L">Vuoi giocare Falsa pista?</h2><div class="tray">${tD.map(d=>dieHTML(d,'static')).join('')}</div>${cardHTML('falsa','L')}
+      <div class="row">${tD.map((d,k)=>d.v<6?`<button class="btn" data-i="${k}">${d.v} → ${Math.min(6,d.v+3)}</button>`:'').join('')}<button class="btn" data-i="-1">Non ora</button></div>`,
+      (st,res)=>st.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>res(+b.dataset.i)));
+  }else{const low=[...tD].sort((a,b)=>a.v-b.v)[0];if(low.v<=2||(lastRound()&&low.v<=4))i=tD.indexOf(low)}
+  if(i<0)return;
+  useCard('L');const d=tD[i],from=d.v;d.v=Math.min(6,d.v+3);
+  log(`Falsa pista: un dado del Ladro passa da ${from} a ${d.v}.`,'L');
+  if(!isHuman('L'))await pause(`<h2 class="who-L">Il Ladro gioca una carta</h2>${cardHTML('falsa','L')}<p>Un suo dado passa da ${from} a ${d.v}.</p>`);
+}
+async function normalRound(R){
+  const tInfo=()=>`<p class="muted">Dadi a disposizione: ${R.nL}.${R.posto?' Posto di blocco: Difesa massima 3.':''}${R.regalo?' Regalo esplosivo: Fuga a zero, un solo dado rilanciabile.':''}${R.moto?' Moto veloce attiva.':''}${R.sabot?' Sabotaggio: la Polizia non rilancia.':''}</p>`;
+  let tD;
+  if(isHuman('L'))tD=await humanRoll('L',R.nL,{maxRe:R.regalo?1:99,info:tInfo()});
+  else tD=cpuRoll('L',R.nL,{maxRe:R.regalo?1:99});
+  if(G.abort)return;
+  await falsaPista(tD);
+  const tz=thiefZones(R);
+  R.tA=isHuman('L')?await humanAssign({side:'L',dice:tD,zones:tz,validate:thiefValidate(R,tz),info:tInfo()}):cpuThief(tD,R);
+  if(G.abort)return;
+  if(!isHuman('L'))await cpuPanel('L','Turno del Ladro (CPU)',`<span class="lbl">Lancia ${R.nL} dadi</span>${rollStory(tD,'L')}<span class="lbl">Assegnazioni</span>${assignStory(R.tA,tz,tD,'L')}`);
+  if(isHuman('L')){trackHuman(R.tA.dif.map(d=>d.v),'dif');trackHuman([...R.tA.fuga,...R.tA.expo].map(d=>d.v),'x')}
+  R.fugaGain=R.regalo?0:sum(R.tA.fuga.map(d=>d.v));
+  R.defTot=Math.min(sum(R.tA.dif.map(d=>d.v)),R.posto?3:99);
+  log(`Ladro: Fuga ${R.tA.fuga.map(d=>d.v).join('+')}${R.regalo?' (vale 0)':''} · Difesa ${R.tA.dif.map(d=>d.v).join('+')}${R.posto?` (max 3 → ${R.defTot})`:''} · Esposizione ${R.tA.expo[0].v}.`,'L');
+  await policeWindow(R);
+  if(G.abort)return;
+  const expoV=R.tiratore?R.tA.expo[0].v:7-R.tA.expo[0].v;
+  if(R.supporto)R.supBonus=Math.ceil((R.regalo?0:Math.max(...R.tA.fuga.map(d=>d.v)))/2);
+  const thiefBox=`<div class="panel" style="background:var(--thief-soft);border:0;gap:6px"><span class="lbl">Assegnazioni del Ladro</span>
+     <div class="row"><span>Fuga</span>${diceRow(R.tA.fuga.map(d=>d.v),'L')}<span>Difesa</span>${diceRow(R.tA.dif.map(d=>d.v),'L')}<b class="num">= ${R.defTot}</b></div>
+     <div class="row"><span>Esposizione ${R.tA.expo[0].v} → per te</span>${diceRow([expoV],'L')}${R.tiratore?'<span class="muted">(Tiratore scelto: non capovolto)</span>':''}</div></div>`;
+  // Raffica
+  if(R.regalo)R.raffica=false;
+  else if(isHuman('P'))R.raffica=await choose(`<h2 class="who-P">Dichiari una Raffica?</h2>${thiefBox}<p>La Raffica aggiunge un dado alla Sparatoria (${R.tA.dif.length+1} invece di ${R.tA.dif.length})${R.fuoco?'. Con Fuoco di copertura non perdi punti Inseguimento.':' ma riduce di 2 l’Inseguimento del round.'}</p>`,[[false,'Niente Raffica'],[true,'Dichiara Raffica']]);
+  else R.raffica=R.fuoco||(R.defTot/R.tA.dif.length>=5&&Math.random()<.7);
+  if(R.raffica)log(`Polizia dichiara una Raffica${R.fuoco?' (Fuoco di copertura)':''}.`,'P');
+  const need=R.tA.dif.length+(R.raffica?1:0);
+  const ex={id:'x',v:expoV,sides:6,side:'L',expo:true};
+  let pD;
+  if(isHuman('P'))pD=await humanRoll('P',R.nP+(R.rinforzi?1:0),{noRe:R.sabot,d10:R.motore,extra:[ex],info:thiefBox});
+  else pD=cpuRoll('P',R.nP+(R.rinforzi?1:0),{noRe:R.sabot,d10:R.motore});
+  if(G.abort)return;
+  const all=[...pD,ex],pz=policeZones(need);
+  const pInfo=thiefBox+`<p class="muted">Servono 1 Inseguimento e ${need} Sparatoria. Il dado Esposizione (bordo tratteggiato) va usato in una delle due.${R.supBonus?` Supporto aereo: +${R.supBonus} alla Sparatoria.`:''}</p>`;
+  R.pA=isHuman('P')?await humanAssign({side:'P',dice:all,zones:pz,validate:policeValidate(pz,all),info:pInfo}):cpuPolice(all,R,need);
+  if(G.abort)return;
+  if(!isHuman('P'))await cpuPanel('P','Turno della Polizia (CPU)',`<p>${R.raffica?`Dichiara una <b>Raffica</b>${R.fuoco?' senza penalità (Fuoco di copertura)':' (−2 all’Inseguimento)'}.`:R.regalo?'Non può dichiarare la Raffica (Regalo esplosivo).':'Non dichiara la Raffica.'} Riceve l’Esposizione come ${expoV}.</p>
+    <span class="lbl">Lancia ${R.nP+(R.rinforzi?1:0)} dadi${R.motore?', uno a dieci facce':''}</span>${rollStory(pD,'P')}<span class="lbl">Assegnazioni</span>${assignStory(R.pA,pz,all,'P')}
+    ${R.supBonus?`<p>Supporto aereo: +${R.supBonus} alla Sparatoria.</p>`:''}`);
+  if(isHuman('P')){trackHuman(R.pA.spar.map(d=>d.v),'spar');trackHuman(R.pA.ins.map(d=>d.v),'x')}
+}
+async function basistaRound(R){
+  // La Polizia agisce per prima
+  if(isHuman('P'))R.raffica=await choose(`<h2 class="who-P">Basista informato: agisci per prima</h2><p>Assegnerai 1 Inseguimento e 2 Sparatoria, oppure 3 con la Raffica (−2 all’Inseguimento).</p>`,[[false,'Niente Raffica'],[true,'Dichiara Raffica']]);
+  else R.raffica=Math.random()<.35;
+  const need=2+(R.raffica?1:0);
+  const pD=isHuman('P')?await humanRoll('P',R.nP,{}):cpuRoll('P',R.nP,{});
+  if(G.abort)return;
+  const pz=policeZones(need);
+  R.pA=isHuman('P')?await humanAssign({side:'P',dice:pD,zones:pz,validate:policeValidate(pz,pD)}):cpuPolice(pD,{...R,basista:true},need);
+  if(G.abort)return;
+  if(isHuman('P')){trackHuman(R.pA.spar.map(d=>d.v),'spar');trackHuman(R.pA.ins.map(d=>d.v),'x')}
+  R.pA.sparTot=sum(R.pA.spar.map(d=>d.v));
+  if(!isHuman('P'))await cpuPanel('P','Turno della Polizia (CPU) · agisce per prima',`<p>${R.raffica?'Dichiara una <b>Raffica</b> (−2 all’Inseguimento).':'Non dichiara la Raffica.'}</p><span class="lbl">Lancia ${R.nP} dadi</span>${rollStory(pD,'P')}<span class="lbl">Assegnazioni</span>${assignStory(R.pA,pz,pD,'P')}`);
+  log(`Polizia: Inseguimento ${R.pA.ins[0].v} · Sparatoria ${R.pA.spar.map(d=>d.v).join('+')}.`,'P');
+  const pBox=`<div class="panel" style="background:var(--police-soft);border:0;gap:6px"><span class="lbl">Assegnazioni della Polizia</span>
+     <div class="row"><span>Inseguimento</span>${diceRow([R.pA.ins[0].v],'P')}<span>Sparatoria</span>${diceRow(R.pA.spar.map(d=>d.v),'P')}<b class="num">= ${R.pA.sparTot}</b></div></div>`;
+  const tD=isHuman('L')?await humanRoll('L',R.nL,{info:pBox}):cpuRoll('L',R.nL,{});
+  if(G.abort)return;
+  await falsaPista(tD);
+  const tz=thiefZones(R);
+  R.tA=isHuman('L')?await humanAssign({side:'L',dice:tD,zones:tz,validate:thiefValidate(R,tz),info:pBox}):cpuThief(tD,R);
+  if(G.abort)return;
+  if(!isHuman('L'))await cpuPanel('L','Turno del Ladro (CPU)',`<span class="lbl">Lancia ${R.nL} dadi</span>${rollStory(tD,'L')}<span class="lbl">Assegnazioni</span>${assignStory(R.tA,tz,tD,'L')}`);
+  if(isHuman('L')){trackHuman(R.tA.dif.map(d=>d.v),'dif');trackHuman(R.tA.fuga.map(d=>d.v),'x')}
+  R.fugaGain=sum(R.tA.fuga.map(d=>d.v));
+  R.defTot=Math.min(sum(R.tA.dif.map(d=>d.v)),R.posto?3:99);
+}
+async function resolveRound(R){
+  const F0=G.F,I0=G.I;
+  const insDie=R.pA.ins[0];let ins=insDie.v;const pen=R.raffica&&!R.fuoco;if(pen)ins=Math.max(0,ins-2);
+  const sparDice=R.pA.spar,sparRaw=sum(sparDice.map(d=>d.v)),spar=sparRaw+R.supBonus;
+  const difRaw=sum(R.tA.dif.map(d=>d.v)),def=R.defTot;
+  G.F+=R.fugaGain;G.I+=ins;
+  const Fmid=G.F,Imid=G.I;
+  let line=`Fuga +${R.fugaGain}, Inseguimento +${ins}${pen?' (Raffica −2)':''}. Sparatoria ${spar} contro Difesa ${def}: `;
+  let lost=0,plost=0,back=0;
+  if(spar>def){lost=Math.min(G.F,spar-def);G.F-=lost;line+=`il Ladro perde ${lost}.`}
+  else if(def>spar){plost=Math.min(G.I,(def-spar)*(R.regalo?2:1));G.I-=plost;line+=`la Polizia perde ${plost}${R.regalo?' (doppio, Regalo esplosivo)':''}.`}
+  else line+='parità, nessuno perde punti.';
+  log(line,'S');
+  const dv=d=>d.expo?`${d.v}<small> (Esp.)</small>`:d.v;
+  const calc=()=>{
+    const gain=[
+      crow('Fuga',`${R.tA.fuga.map(d=>d.v).join(' + ')}${R.tA.fuga.length>1?` = ${sum(R.tA.fuga.map(d=>d.v))}`:''}${R.regalo?' → vale 0 per Regalo esplosivo':''}`,`+${R.fugaGain}`,'L'),
+      crow('Inseguimento',`${dv(insDie)}${pen?` − 2 per la Raffica${insDie.v<2?', minimo 0':''}`:R.raffica?' (Raffica senza penalità: Fuoco di copertura)':''}`,`+${ins}`,'P')];
+    const fight=[
+      crow('Difesa',`${R.tA.dif.map(d=>d.v).join(' + ')}${R.tA.dif.length>1?` = ${difRaw}`:''}${R.posto&&difRaw>3?' → limite 3 per Posto di blocco':''}`,def),
+      crow('Sparatoria',`${sparDice.map(dv).join(' + ')}${R.supBonus?` + ${R.supBonus} Supporto aereo (metà di ${Math.max(...R.tA.fuga.map(d=>d.v))}, per eccesso)`:''}${sparDice.length>1||R.supBonus?` = ${spar}`:''}`,spar)];
+    if(spar>def)fight.push(crow('Danno al Ladro',`${spar} − ${def} = ${spar-def}${lost<spar-def?` → la Fuga non scende sotto zero, si perdono solo ${lost}`:''}`,`−${lost}`,'neg'));
+    else if(def>spar)fight.push(crow('Danno alla Polizia',`${def} − ${spar} = ${def-spar}${R.regalo?` × 2 Regalo esplosivo = ${(def-spar)*2}`:''}${plost<(def-spar)*(R.regalo?2:1)?` → l’Inseguimento non scende sotto zero, si perdono solo ${plost}`:''}`,`−${plost}`,'neg'));
+    else fight.push(crow('Danno',`${spar} = ${def}: parità`,'0'));
+    if(back)fight.push(crow('Rifugio segreto',`recupera fino a 3 dei ${lost} persi`,`+${back}`,'L'));
+    const tot=[
+      crow('Fuga',`${F0} + ${R.fugaGain}${lost?` − ${lost}`:''}${back?` + ${back}`:''}`,G.F,'L tot'),
+      crow('Inseguimento',`${I0} + ${ins}${plost?` − ${plost}`:''}`,G.I,'P tot')];
+    return calcBox([csec('Punti del round',gain),csec('Sparatoria contro Difesa',fight),csec('Nuovi punteggi',tot)]);
+  };
+  const head=()=>`<h2>Risoluzione del round ${G.round}</h2>
+   <div class="summary">
+    <div><span class="lbl">Fuga</span><b class="num" style="color:var(--thief)">+${R.fugaGain}</b></div>
+    <div><span class="lbl">Inseguimento</span><b class="num" style="color:var(--police)">+${ins}</b></div>
+    <div><span class="lbl">Sparatoria</span><b class="num">${spar}</b></div>
+    <div><span class="lbl">Difesa</span><b class="num">${def}</b></div></div>
+   <p>${spar>def?`Il Ladro perde <b>${lost}</b> punti Fuga.`:def>spar?`La Polizia perde <b>${plost}</b> punti Inseguimento.`:'Parità: nessuno perde punti.'}</p>`;
+  if(lost>0&&hasCard('L','rifugio')){
+    let use=isHuman('L')?await askCard('L',head()+calc()):true;
+    if(use){useCard('L');back=Math.min(3,lost);G.F+=back;log(`Rifugio segreto: il Ladro recupera ${back}.`,'L');
+      await pause(head()+cardHTML('rifugio','L')+`<p>Il Ladro recupera <b>${back}</b> punti Fuga.</p>`+calc());return}
+  }
+  await pause(head()+calc());
+}
+
+/* ===================== Confronto ===================== */
+const confVal=(type,v)=>{if(type==='R')return Math.max(...v);const t=[...v].sort((a,b)=>b-a).slice(0,2);return t.includes(1)?0:t[0]+t[1]};
+async function humanConf(s,final){
+  const r={rinforzi:false,falsa:false};
+  if(final&&s==='P'&&hasCard('P','rinforzi')){r.rinforzi=await askCard('P','<p class="muted">Confronto finale, prima di scegliere l’intervento.</p>');if(r.rinforzi)useCard('P')}
+  const nd=r.rinforzi?3:2;
+  r.type=await choose(`<h2 class="who-${s}">${final?'Confronto finale':'Confronto di fine fase'}</h2>
+    <p>Scegli in segreto l’intervento. L’avversario sceglie nello stesso momento.</p>
+    <div class="seg"><div class="opt"><b>Intervento rapido</b><small>${nd} dadi, conti solo il più alto. Massimo 6.</small></div>
+    <div class="opt"><b>Intervento disperato</b><small>${nd===3?'3 dadi, sommi i due più alti':'2 dadi sommati'}. Se ${nd===3?'uno dei due conservati':'uno'} è 1, vale zero. Fino a 12.</small></div></div>`,
+    [['R','Rapido'],['D','Disperato']]);
+  let v=Array.from({length:nd},()=>rnd(6));
+  const show=(t)=>`<h2 class="who-${s}">${r.type==='R'?'Intervento rapido':'Intervento disperato'}</h2><div class="tray">${v.map(x=>dieHTML({v:x,side:s},'new static')).join('')}</div><p>${t}</p>`;
+  const again=await choose(show(`Risultato: <b class="num">${confVal(r.type,v)}</b>. Puoi rilanciare una volta tutti i dadi.`),[[false,'Accetta'],[true,'Rilancia tutti']]);
+  if(again){r.first=[...v];v=v.map(()=>rnd(6))}
+  if(final&&s==='L'&&hasCard('L','falsa')){
+    const pick=await ui(show(`Risultato: <b class="num">${confVal(r.type,v)}</b>.`)+cardHTML('falsa','L')+`<p>Scegli un dado da aumentare di 3, oppure tieni la carta.</p>
+      <div class="row">${v.map((x,i)=>`<button class="btn" data-i="${i}">Dado ${x} → ${Math.min(6,x+3)}</button>`).join('')}<button class="btn" data-i="-1">Non usare</button></div>`,
+      (st,res)=>st.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>res(+b.dataset.i)));
+    if(pick>=0){useCard('L');r.falsa=[v[pick],Math.min(6,v[pick]+3),pick];v[pick]=r.falsa[1]}
+  }
+  r.v=v;r.val=confVal(r.type,v);return r;
+}
+function cpuConf(s,final){
+  const r={};const me=s==='L'?G.F:G.I,them=s==='L'?G.I:G.F,gap=them-me;
+  if(final&&s==='P'&&hasCard('P','rinforzi')){r.rinforzi=true;useCard('P')}
+  const nd=r.rinforzi?3:2;
+  r.type=(final?gap>=3:gap>=6)?'D':'R';
+  let v=Array.from({length:nd},()=>rnd(6));
+  const bad=x=>r.type==='R'?confVal('R',x)<=3:confVal('D',x)<=5;
+  if(bad(v)){r.first=[...v];v=v.map(()=>rnd(6))}
+  if(final&&s==='L'&&hasCard('L','falsa')){let bi=-1,bv=confVal(r.type,v);
+    v.forEach((x,i)=>{const w=[...v];w[i]=Math.min(6,x+3);const c=confVal(r.type,w);if(c>bv){bv=c;bi=i}});
+    if(bi>=0){useCard('L');r.falsa=[v[bi],Math.min(6,v[bi]+3),bi];v[bi]=r.falsa[1]}}
+  r.v=v;r.val=confVal(r.type,v);return r;
+}
+async function confronto(final){
+  G.stage='conf';G.final=final;
+  const h=G.human,c=opp(h);
+  const cr=cpuConf(c,final);
+  const hr=await humanConf(h,final);
+  if(G.abort)return;
+  const res={[h]:hr,[c]:cr};
+  const F0=G.F,I0=G.I;
+  G.F+=res.L.val;G.I+=res.P.val;
+  if(hr.type==='D'&&hr.val===0)G.t.failedD=true;
+  const tn=t=>t==='R'?'Rapido':'Disperato';
+  log(`Confronto: Ladro ${tn(res.L.type)} ${res.L.v.join('·')} → +${res.L.val}; Polizia ${tn(res.P.type)} ${res.P.v.join('·')} → +${res.P.val}.`,'S');
+  const col=s=>`<div class="panel" style="background:var(--${s==='L'?'thief':'police'}-soft);border:0">
+     <span class="lbl">${NAME[s]} · ${tn(res[s].type)}${res[s].rinforzi?' · Rinforzi tattici':''}${res[s].falsa?' · Falsa pista':''}</span>
+     ${res[s].first?`<div class="row"><span class="lbl">Primo lancio</span>${res[s].first.map(x=>dieHTML({v:x,side:s},'sm static rr')).join('')}<span class="muted">rilanciati tutti</span></div>`:'<p class="muted" style="margin:0">Nessun rilancio.</p>'}
+     <div class="row">${res[s].v.map(x=>dieHTML({v:x,side:s},'sm static')).join('')}<b class="num" style="font-size:24px">+${res[s].val}</b></div></div>`;
+  const how=s=>{const r=res[s],v=r.v,rows=[];
+    if(r.first)rows.push(crow('Rilancio',`primo lancio ${r.first.join(' · ')} → rilanciati tutti → ${(r.falsa?v.map((x,i)=>i===r.falsa[2]?r.falsa[0]:x):v).join(' · ')}`,''));
+    if(r.falsa)rows.push(crow('Falsa pista',`${r.falsa[0]} + 3 = ${r.falsa[0]+3}${r.falsa[0]+3>6?', massimo 6':''}`,r.falsa[1]));
+    const srt=[...v].sort((a,b)=>b-a);
+    if(r.type==='R')rows.push(crow('Rapido',`${v.length===3?'3 dadi (Rinforzi) ':''}${v.join(' · ')} → conta il più alto`,`+${r.val}`,s));
+    else{const k=srt.slice(0,2);rows.push(crow('Disperato',`${v.length===3?`3 dadi (Rinforzi) ${v.join(' · ')} → si tengono ${k.join(' e ')}, `:''}${k.includes(1)?`${k.join(' + ')}: c’è un 1, l’intervento fallisce`:`${k[0]} + ${k[1]}`}`,`+${r.val}`,s))}
+    return csec(NAME[s],rows)};
+  const tot=csec('Nuovi punteggi',[crow('Fuga',`${F0} + ${res.L.val}`,G.F,'L tot'),crow('Inseguimento',`${I0} + ${res.P.val}`,G.I,'P tot')]);
+  await pause(`<h2>Interventi rivelati</h2><div class="zones">${col('L')}${col('P')}</div>${calcBox([how('L'),how('P'),tot])}`);
+}
+
+/* ===================== Partita ===================== */
+async function playGame(cfg){
+  G={human:cfg.role,mode:cfg.mode==='travel'?'travel':'full',expert:cfg.mode==='expert',F:0,I:2,phase:1,round:1,stage:'round',
+     cards:{L:null,P:null},used:{L:false,P:false},log:[],t:{usedCard:false,one:false,six:false,failedD:false}};
+  setMode(cfg.role);
+  shell();
+  log(`La Polizia parte con 2 punti Inseguimento.`,'S');
+  log(`Nuova partita: tu sei ${G.human==='P'?'Dani il Metallaro':'Dani il Nerd'}${G.expert?', modalità Esperti':''}${G.mode==='travel'?', variante da viaggio':''}.`,'S');
+  const phases=G.mode==='travel'?1:2;
+  for(let ph=1;ph<=phases;ph++){
+    G.phase=ph;
+    if(ph===2){await drawCards();if(G.abort)return}
+    for(let r=1;r<=3;r++){G.round=r;G.stage='round';await playRound();if(G.abort)return}
+    if(ph<phases){await confronto(false);if(G.abort)return}
+  }
+  finish();
+}
+const CPU_PREF={L:['rifugio','falsa','moto','sabot','basista','regalo'],P:['rinforzi','motore','supporto','fuoco','tiratore','posto']};
+async function drawCards(){
+  G.stage='draw';
+  // Tutti pescano: chi è avanti (o in parità) pesca 1 carta, chi è indietro ne pesca 2 e ne tiene una
+  const behind=G.F<G.I?'L':G.I<G.F?'P':null;
+  const deal=(s,n)=>{const deck=[...CARDS[s]].sort(()=>Math.random()-.5);return deck.slice(0,n).map(c=>c.id)};
+  const hands={L:deal('L',behind==='L'?2:1),P:deal('P',behind==='P'?2:1)};
+  const h=G.human,c=opp(h);
+  G.cards[c]=hands[c].length>1?[...hands[c]].sort((a,b)=>CPU_PREF[c].indexOf(a)-CPU_PREF[c].indexOf(b))[0]:hands[c][0];
+  const intro=`<h2>Pesca delle carte</h2>
+    <p>Fine della prima fase: Fuga <b class="num">${G.F}</b>, Inseguimento <b class="num">${G.I}</b>. ${behind?`È indietro ${behind==='L'?'il Ladro':'la Polizia'}: pesca due carte e ne tiene una. L’altro giocatore ne pesca una.`:'Parità: ognuno pesca una carta.'}</p>`;
+  if(hands[h].length>1){
+    G.cards[h]=await ui(intro+`<p>Sei indietro: scegli quale carta tenere. L’altra torna nel mazzo.</p>
+      <div class="zones">${hands[h].map((id,i)=>`<div style="display:flex;flex-direction:column;gap:8px">${cardHTML(id,h)}<button class="btn primary" data-k="${i}">Tieni ${esc(cardById(id).n)}</button></div>`).join('')}</div>`,
+      (st,res)=>st.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>res(hands[h][+b.dataset.k])));
+    if(G.abort)return;
+  }else G.cards[h]=hands[h][0];
+  log(`Fine prima fase: Fuga ${G.F}, Inseguimento ${G.I}. ${behind?`${NAME[behind]} pesca 2 carte e ne tiene una, ${NAME[opp(behind)]} ne pesca 1.`:'Entrambi pescano 1 carta.'}`,'S');
+  await pause(intro+`<p>La tua carta:</p>${cardHTML(G.cards[h],h)}
+    <p class="muted">Resta segreta finché non la giochi. Se non la usi entro la fine, non ha effetto. ${behind===c?'L’avversario ha pescato due carte e ne tiene una coperta.':'L’avversario tiene una carta coperta.'}</p>`,'Inizia la seconda fase');
+  G.stage='round';
+}
+function finish(){
+  const won=(G.F>G.I)===(G.human==='L');
+  const before=DOSSIERS.map((d,i)=>d.items.map(achDone));
+  const beforeD=DOSSIERS.map((_,i)=>dossierDone(i));
+  P.games++;P[G.human==='L'?'gamesL':'gamesP']++;
+  if(G.mode==='full')P.fullGames++;
+  if(G.t.usedCard)P.cardsUsed++;
+  if(G.t.one)P.ones++;
+  if(won){P.wins++;P[G.human==='L'?'winsL':'winsP']++;P.streak++;P.bestStreak=Math.max(P.bestStreak,P.streak);
+    if(Math.abs(G.F-G.I)>=10)P.bigWins++;
+    if(G.t.failedD)P.minWins++;
+    if(G.cards[G.human]&&!G.used[G.human])P.drawerWins++;
+    if(G.mode==='full'&&!G.t.usedCard)P.cleanFullWins++;
+    if(G.expert){P[G.human==='L'?'expWinsL':'expWinsP']++;if(!G.t.six)P.no6Wins++}
+  }else P.streak=0;
+  P.last={role:G.human,mode:G.expert?'expert':G.mode};
+  save();
+  const newA=[];DOSSIERS.forEach((d,i)=>d.items.forEach((it,j)=>{if(!before[i][j]&&achDone(it))newA.push(it[0])}));
+  const newD=DOSSIERS.filter((_,i)=>!beforeD[i]&&dossierDone(i));
+  G.stage='end';renderBoard();
+  const st=document.getElementById('stage');
+  st.innerHTML=`<div class="result" style="display:flex;flex-direction:column;gap:12px">
+    <span class="tape">${won?'Vittoria':'Sconfitta'}</span>
+    <h2 style="color:var(--${G.F>G.I?'thief':'police'})">${G.human==='P'?(G.F>G.I?'Lucifero alza il dito medio e sparisce in una nuvola di zolfo. Niente band, per ora.':'Lucifero si arrende: nasce la prima band Brutal Cozy Metal!'):(G.F>G.I?'Daniele si dilegua: stasera niente Mario Kart.':'Lucifero si piazza comodo sul divano al tuo fianco e ti mette un controller in mano.')}</h2>
+    <p>Fuga <b class="num">${G.F}</b> contro Inseguimento <b class="num">${G.I}</b>${G.F===G.I?' (in parità vince la Polizia)':''}.</p>
+    ${newA.length?`<div class="toast">Traguardi raggiunti: ${newA.map(esc).join(', ')}</div>`:''}
+    ${newD.map(d=>`<div class="toast" style="background:var(--accent);color:var(--accent-ink)">Dossier “${esc(d.name)}” completato. Reward sbloccato: ${esc(d.reward)}</div>`).join('')}
+    <div class="row"><button class="btn primary" id="again">Gioca ancora</button><button class="btn" id="home">Torna al menu</button></div></div>`;
+  st.querySelector('#again').onclick=()=>playGame({role:G.human,mode:P.last.mode});
+  st.querySelector('#home').onclick=()=>{G=null;menu()};
+  applyPrefs();
+}
+
+/* ===================== Manifesto originale (disegnato in codice) ===================== */
+function posterSVG(){
+  let seed=40;const r=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+  let flames='';for(let i=0;i<22;i++){const x=-10+i*20+r()*8,h=40+r()*60,w=26+r()*14;
+    flames+=`<path d="M${(x-w/2).toFixed(0)},500 Q${(x-w/3).toFixed(0)},${(500-h*.55).toFixed(0)} ${x.toFixed(0)},${(500-h).toFixed(0)} Q${(x+w/3).toFixed(0)},${(500-h*.5).toFixed(0)} ${(x+w/2).toFixed(0)},500Z"/>`}
+  let sparks='';for(let i=0;i<34;i++)sparks+=`<circle cx="${(10+r()*380).toFixed(0)}" cy="${(120+r()*330).toFixed(0)}" r="${(r()*1.6+.4).toFixed(1)}"/>`;
+  return `<svg class="poster" viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Locandina: caricatura di Daniele con la chitarra contro Lucifero con sciarpa e tazza fumante">
+  <defs>
+    <radialGradient id="hell" cx=".5" cy=".85" r=".9"><stop offset="0" stop-color="#7a1712"/><stop offset=".55" stop-color="#2a0c0e"/><stop offset="1" stop-color="#0b0607"/></radialGradient>
+    <linearGradient id="fire" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffcf4a"/><stop offset=".5" stop-color="#ff6a2b"/><stop offset="1" stop-color="#b3201a" stop-opacity=".2"/></linearGradient>
+    <pattern id="plaid" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#8a6a4f"/><rect width="16" height="6" fill="#2a211c" opacity=".7"/><rect width="6" height="16" fill="#2a211c" opacity=".6"/><rect x="10" width="2" height="16" fill="#e8dcc7" opacity=".75"/><rect y="10" width="16" height="2" fill="#e8dcc7" opacity=".75"/></pattern>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f2f0ea"/><stop offset="1" stop-color="#8d8a85"/></linearGradient>
+  </defs>
+  <rect width="400" height="500" rx="6" fill="url(#hell)"/>
+  <g fill="#ffb347" opacity=".55">${sparks}</g>
+  <g fill="url(#fire)">${flames}</g>
+  <text x="200" y="98" text-anchor="middle" font-family="Metal Mania,Impact,fantasy" font-size="74"><tspan fill="#f3ebe6">DANI</tspan><tspan fill="#ff5b4d">HELL</tspan></text>
+  <text x="200" y="128" text-anchor="middle" fill="#f3ebe6" font-family="Jost,Futura,sans-serif" font-size="13" font-weight="700" letter-spacing="5">DANIELE VS LUCIFERO</text>
+  <text x="200" y="152" text-anchor="middle" fill="#f2b134" font-family="Jost,Futura,sans-serif" font-size="11" letter-spacing="4">BRUTAL COZY EDITION · 40 ANNI</text>
+  <!-- Daniele: testa rasata, occhiali neri squadrati, barba brizzolata corta, maglietta metal -->
+  <g>
+    <ellipse cx="110" cy="266" rx="44" ry="14" fill="#1b191b"/>
+    <rect x="62" y="260" width="96" height="124" rx="24" fill="#121012"/>
+    <path d="M86,262 L134,262 L132,384 L88,384Z" fill="#121012"/>
+    <path d="M98,262 Q110,272 122,262" stroke="#3a3639" stroke-width="3" fill="none"/>
+    <text x="110" y="296" text-anchor="middle" fill="#ff5b4d" font-family="Metal Mania,Impact,fantasy" font-size="17">BCM</text>
+    <path d="M94,302 l4,4 l4,-4 l4,4 l4,-4 l4,4 l4,-4 l4,4 l4,-4" stroke="#f2b134" stroke-width="1.6" fill="none"/>
+    <ellipse cx="71" cy="214" rx="8" ry="12" fill="#dda57f"/><ellipse cx="149" cy="214" rx="8" ry="12" fill="#dda57f"/>
+    <ellipse cx="110" cy="206" rx="40" ry="46" fill="#e7b48f"/>
+    <ellipse cx="94" cy="176" rx="14" ry="7" fill="#ffffff" opacity=".35" transform="rotate(-18 94 176)"/>
+    <path d="M72,214 Q74,252 110,258 Q146,252 148,214 Q142,234 128,237 Q110,244 92,237 Q78,234 72,214Z" fill="#8f8a84"/>
+    <path d="M93,248 Q110,257 127,248 Q121,255 110,256 Q99,255 93,248Z" fill="#c4bfb8"/>
+    <g stroke="#5f5953" stroke-width="1.6" stroke-linecap="round" opacity=".7"><path d="M81,236 l2,6 M90,243 l2,6 M130,243 l-2,6 M139,236 l-2,6 M110,249 l0,5"/></g>
+    <path d="M94,236 Q110,226 126,236 Q118,240 110,236 Q102,240 94,236Z" fill="#4e443d"/>
+    <path d="M103,244 Q110,247 117,244" stroke="#7a3b30" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M110,212 Q105,224 108,228 Q112,230 116,227" stroke="#b97c5a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M83,193 Q95,186 106,192 M114,192 Q125,186 137,193" stroke="#2a211c" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    <circle cx="96" cy="206" r="3.8" fill="#3b2416"/><circle cx="124" cy="206" r="3.8" fill="#3b2416"/>
+    <circle cx="97.3" cy="204.6" r="1.1" fill="#fff"/><circle cx="125.3" cy="204.6" r="1.1" fill="#fff"/>
+    <g fill="none" stroke="#111" stroke-width="4" stroke-linejoin="round"><rect x="83" y="197" width="25" height="18" rx="3"/><rect x="112" y="197" width="25" height="18" rx="3"/><path d="M108,204 L112,204 M83,201 L72,198 M137,201 L148,198"/></g>
+    <path d="M40,268 L128,336" stroke="#6b4a2a" stroke-width="8" stroke-linecap="round"/>
+    <path d="M30,258 l14,4 l-6,10 l-14,-4Z" fill="#121012"/>
+    <path d="M118,318 L196,286 L162,336 L196,388 L118,356Z" fill="url(#steel)" stroke="#121012" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="140" cy="336" r="5" fill="#121012"/>
+    <path d="M150,276 L157,292" stroke="#121012" stroke-width="16" stroke-linecap="round"/>
+    <path d="M156,296 Q144,316 136,330" stroke="#e7b48f" stroke-width="11" stroke-linecap="round" fill="none"/>
+    <circle cx="134" cy="334" r="7" fill="#e7b48f"/>
+  </g>
+  <text x="200" y="250" text-anchor="middle" fill="#f2b134" font-family="Metal Mania,Impact,fantasy" font-size="46">vs</text>
+  <!-- Lucifero: corna, pizzetto, cardigan e sciarpa, tazza fumante -->
+  <g>
+    <path d="M232,372 Q206,392 222,414 Q232,428 214,436" stroke="#b3201a" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M206,430 l14,-4 l-4,14Z" fill="#b3201a"/>
+    <rect x="248" y="250" width="84" height="130" rx="22" fill="#c98a2b"/>
+    <path d="M290,252 L290,380" stroke="#8a5a1a" stroke-width="3"/>
+    <g fill="#5a3410"><circle cx="296" cy="290" r="3"/><circle cx="296" cy="318" r="3"/><circle cx="296" cy="346" r="3"/></g>
+    <circle cx="290" cy="212" r="34" fill="#d8342a"/>
+    <path d="M266,190 Q250,158 266,144 Q266,170 282,182Z" fill="#f3ebe6"/>
+    <path d="M314,190 Q330,158 314,144 Q314,170 298,182Z" fill="#f3ebe6"/>
+    <path d="M270,200 L284,206 M310,200 L296,206" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="278" cy="212" rx="5" ry="4" fill="#ffd34a"/><ellipse cx="302" cy="212" rx="5" ry="4" fill="#ffd34a"/>
+    <path d="M276,228 Q290,238 304,228" stroke="#111" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M282,240 L290,262 L298,240Z" fill="#2a0c0e"/>
+    <g><rect x="250" y="246" width="80" height="18" rx="9" fill="#6d3fd6"/>
+      <g stroke="#f3ebe6" stroke-width="3"><path d="M262,247 v16 M276,247 v16 M290,247 v16 M304,247 v16 M318,247 v16"/></g>
+      <rect x="300" y="256" width="16" height="50" rx="6" fill="#6d3fd6"/></g>
+    <path d="M262,300 Q290,330 330,318" stroke="#d8342a" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <rect x="322" y="300" width="28" height="32" rx="5" fill="#f3ebe6"/>
+    <path d="M350,308 q12,8 0,16" stroke="#f3ebe6" stroke-width="4" fill="none"/>
+    <g stroke="#f3ebe6" stroke-width="2" fill="none" opacity=".75" stroke-linecap="round"><path d="M330,294 q-5,-8 0,-16 q5,-8 0,-16"/><path d="M342,294 q-5,-8 0,-16 q5,-8 0,-16"/></g>
+  </g>
+  <text x="200" y="490" text-anchor="middle" fill="#2a0c0e" font-family="Jost,Futura,sans-serif" font-size="9" letter-spacing="2.5" font-weight="700">UN GIOCO DI DANIELE RADAVERO</text>
+</svg>`;
+}
+
+/* ===================== Menu ===================== */
+function menu(){
+  applyPrefs();
+  const expertOK=dossierDone(0);
+  let role=P.last.role||'P',mode=P.last.mode||'full';setMode(role);if(mode==='expert'&&!expertOK)mode='full';
+  const doss=DOSSIERS.map((d,i)=>{const ok=dossierDone(i);
+    return `<article class="dossier"><header><h3><span class="lbl">Dossier ${i+1}</span><br>${esc(d.name)}</h3><span class="stamp ${ok?'ok':'no'}">${ok?'Chiuso':'Aperto'}</span></header>
+     ${d.items.map(it=>{const [c,t]=it[2](P),done=c>=t;return `<div class="ach ${done?'done':''}"><span class="chk">${done?'✓':''}</span>
+       <div class="t"><b>${esc(it[0])}</b><span>${esc(it[1])}</span>${t>1?`<div class="bar"><i style="width:${Math.min(100,c/t*100)}%"></i></div>`:''}</div>
+       <span class="lbl num">${Math.min(c,t)}/${t}</span></div>`}).join('')}
+     <div class="reward"><span class="lbl">Reward</span> · ${esc(d.reward)} ${ok?'· <b style="color:var(--good)">sbloccato</b>':''}</div></article>`}).join('');
+  app.innerHTML=`
+   <div class="marin" aria-hidden="true"></div>
+   <header class="hero withposter">${posterSVG()}<h1 class="sr">DANIHELL</h1>
+     <div class="htext"><span class="credit">Gioco per due · tu contro la CPU</span>
+     <p class="tagline">Il gioco ufficiale dei 40 anni di Daniele. Scegli il tuo personaggio: uno insegue Lucifero, l’altro scappa da lui.</p>
+     <p class="muted" style="margin:0">Partite giocate: <b class="num">${P.games}</b> · vittorie: <b class="num">${P.wins}</b> · serie attuale: <b class="num">${P.streak}</b></p></div></header>
+   <section class="panel">
+     <span class="lbl">Scegli il tuo Dani</span>
+     <div class="seg" id="roles">
+       <button class="opt P" data-r="P"><span class="who">Dani il Metallaro</span><small>Insegui Lucifero: deve entrare nella tua band Brutal Cozy Metal. Accumuli Entusiasmo e la parità è tua.</small></button>
+       <button class="opt L" data-r="L"><span class="who">Dani il Nerd</span><small>Scappi da Lucifero: vuole a ogni costo sfidarti a Mario Kart. Accumuli Scuse e vinci solo se superi il suo Assillo.</small></button></div>
+     <span class="lbl">Modalità</span>
+     <div class="seg" id="modes">
+       <button class="opt" data-m="full"><b>Partita completa</b><small>Due fasi, carte azione, un confronto a metà partita.</small></button>
+       <button class="opt" data-m="travel"><b>Partita lampo</b><small>Una fase da tre round. Niente carte, niente confronti.</small></button>
+       <button class="opt" data-m="expert" ${expertOK?'':'disabled'}><b>Esperti</b><small>${expertOK?'Partita completa con riduzione dei dadi e valori distinti tra i ruoli.':'Si sblocca chiudendo il Dossier 1.'}</small></button></div>
+     <div class="row"><button class="btn primary" id="start">Inizia la partita</button>${calcBtn()}<span class="muted" style="font-size:14px">Mostra il dettaglio dei calcoli a fine round e nei confronti.</span></div>
+   </section>
+   <section class="panel"><details ${P.games===0?'open':''}><summary>Come si gioca</summary><ol class="howto">
+     <li>Scegli il tuo Dani: il Metallaro insegue, il Nerd scappa. Il computer gioca la parte di Lucifero.</li>
+     <li>La partita ha due fasi da tre round. In ogni round lanciate i dadi: 4 a testa, 5 per chi è indietro. Puoi rilanciare quanti dadi vuoi, ma una volta sola.</li>
+     <li>Il Ladro assegna i suoi dadi: 1 ai punti Fuga, 1 o 2 alla Difesa e 1 all’Esposizione, che passa alla Polizia capovolto (il 6 diventa 1).</li>
+     <li>La Polizia assegna 1 dado all’Inseguimento e tanti dadi Sparatoria quanti sono i dadi Difesa. Può dichiarare una Raffica per avere un dado in più, ma perde 2 punti in quel round.</li>
+     <li>Si confrontano Sparatoria e Difesa: chi ha il totale più basso perde la differenza dai suoi punti.</li>
+     <li>A metà partita c’è il confronto di fine fase: scegli in segreto Rapido, sicuro, o Disperato, che vale di più ma azzera tutto se esce un 1. Poi ognuno pesca una carta azione da giocare nella seconda fase; chi è indietro ne pesca due e ne tiene una.</li>
+     <li>Alla fine vince il Ladro se ha più punti Fuga dell’Inseguimento della Polizia. In parità vince la Polizia.</li>
+     <li>Durante la partita lo schermo ti dice sempre cosa fare. Con “Calcoli: sì” vedi tutti i conti a fine round.</li></ol></details></section>
+   <section class="panel"><details><summary>Promemoria regole</summary><ul>
+     <li>Round 1: 4 dadi a testa. Round 2 e 3: chi è indietro lancia 5 dadi.</li>
+     <li>Un solo rilancio di uno o più dadi dopo il lancio.</li>
+     <li>Ladro: 1 dado Fuga, 1 o 2 Difesa (sommati), 1 Esposizione che passa alla Polizia capovolta (1↔6, 2↔5, 3↔4).</li>
+     <li>Polizia: 1 Inseguimento e tanti dadi Sparatoria quanti i dadi Difesa. L’Esposizione va usata in uno dei due ruoli.</li>
+     <li>Raffica: un dado Sparatoria in più, −2 all’Inseguimento del round.</li>
+     <li>Sparatoria maggiore della Difesa: il Ladro perde la differenza. Difesa maggiore: la perde la Polizia. Mai sotto zero.</li>
+     <li>La Polizia parte con 2 punti Inseguimento. La partita si decide nei round: non c’è confronto finale.</li>
+     <li>Confronto di fine fase (solo dopo la prima fase): Rapido (il più alto di 2 dadi) o Disperato (somma di 2, vale zero se esce un 1). Un rilancio di tutti i dadi.</li>
+     <li>Tra le due fasi tutti pescano una carta azione; chi è indietro ne pesca due e ne tiene una.</li></ul></details></section>
+   <section style="display:flex;flex-direction:column;gap:10px"><h2 style="font-family:var(--label);font-size:24px">Dossier e traguardi</h2>
+     <div class="dossiers">${doss}</div></section>
+   <section class="panel"><span class="lbl">Reward sbloccati</span><div id="rewards" style="display:flex;flex-direction:column;gap:10px"></div></section>`;
+  const sync=()=>{app.querySelectorAll('[data-r]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===role));
+    app.querySelectorAll('[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode))};
+  app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{if(role===b.dataset.r)return;P.last.role=b.dataset.r;P.last.mode=mode;save();menu()});
+  app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{if(!b.disabled){mode=b.dataset.m;sync()}});
+  sync();
+  app.querySelector('#start').onclick=()=>playGame({role,mode});
+  const rw=app.querySelector('#rewards');const parts=[];
+  parts.push(dossierDone(0)?'<div><b>Modalità Esperti</b> · disponibile tra le modalità.</div>':'<div class="muted">Modalità Esperti · chiudi il Dossier 1.</div>');
+  parts.push(dossierDone(1)?`<div class="row"><b>Dadi infernali</b><button class="btn" id="dice">${P.prefs.dice==='infernal'?'Usa i dadi classici':'Usa i dadi infernali'}</button></div>`:'<div class="muted">Dadi infernali · chiudi il Dossier 2.</div>');
+  parts.push(dossierDone(2)?`<div class="row"><b>Tema Cozy</b><button class="btn" id="theme">${P.prefs.theme==='cozy'?'Torna al tema base':'Attiva il tema Cozy'}</button></div>`:'<div class="muted">Tema Cozy · chiudi il Dossier 3.</div>');
+  parts.push(dossierDone(3)?'<div class="row"><b>Bonus track</b><button class="btn" id="films">Apri la setlist</button></div>':'<div class="muted">Bonus track: la setlist · chiudi il Dossier 4.</div>');
+  rw.innerHTML=parts.join('');
+  const f=rw.querySelector('#films');if(f)f.onclick=films;
+  const d=rw.querySelector('#dice');if(d)d.onclick=()=>{P.prefs.dice=P.prefs.dice==='infernal'?'std':'infernal';save();menu()};
+  const t=rw.querySelector('#theme');if(t)t.onclick=()=>{P.prefs.theme=P.prefs.theme==='cozy'?'base':'cozy';save();menu()};
+  window.scrollTo(0,0);
+}
+
+/* ===================== Bonus track ===================== */
+const SETLIST=[['Plaid of Doom','4:12'],['Abyss of Bergamotto','5:40'],['Satan’s Ciabattas','3:33'],['Relaxing Blast Beat','2:58'],
+  ['Requiem for a missing nap','6:06'],['Bloodbath to clean (don’t wanna)','4:44'],['40 is the new 40','4:00'],['Lucifero ha detto sì','6:66']];
+function films(){
+  app.innerHTML=`<header class="hero"><span class="tape">Reward · Dossier 4</span><h1 style="font-size:clamp(40px,10vw,64px)">Brutal Cozy Metal</h1>
+    <p class="muted">Il primo album della band di Daniele e Lucifero. Registrato in pigiama, mixato all’Inferno.</p></header>
+   <section class="panel"><ol class="setlist">${SETLIST.map((t,i)=>`<li><span class="n">${i+1}</span><b>${esc(t[0])}</b><span class="d">${t[1]}</span></li>`).join('')}</ol>
+    <div class="row"><button class="btn primary" id="back">Torna al menu</button></div></section>`;
+  app.querySelector('#back').onclick=menu;window.scrollTo(0,0);
+}
+
+new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData')trNode(m.target);else m.addedNodes.forEach(trNode)}})
+  .observe(app,{childList:true,subtree:true,characterData:true});
+menu();
+</script>
+
+
+</body>
+</html>
