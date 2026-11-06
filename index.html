@@ -266,9 +266,13 @@ const VOC={
     cards:{posto:'Let’s-a-go!',rinforzi:'Il fascino discreto del multiplayer',tiratore:'Ti vedo online',supporto:'Gruppo WhatsApp',motore:'Controller pro',fuoco:'Pizza Diavola',
            rifugio:'Salvataggio rapido',moto:'Gameplay su YouTube',basista:'Zelda monella',falsa:'Batteria al 3%',sabot:'Maledetto Wi-Fi!',regalo:'Ho una bruschetta in un occhio'}}
 };
+const OLDCARD={posto:'Posto di blocco',rinforzi:'Rinforzi tattici',tiratore:'Tiratore scelto',supporto:'Supporto aereo',motore:'Motore potenziato',fuoco:'Fuoco di copertura',
+  rifugio:'Rifugio segreto',moto:'Moto veloce',basista:'Basista informato',falsa:'Falsa pista',sabot:'Sabotaggio',regalo:'Regalo esplosivo'};
 let RULES=[];
 function buildRules(){
   const v=VOC[MODE],n=v.name,t=v.t,R=[];
+  for(const [id,old] of Object.entries(OLDCARD))R.push([new RegExp(old,'g'),v.cards[id]]);
+  R.push([/\bRinforzi\b/g,v.cards.rinforzi]);
   R.push([/\b[Ii]l Ladro\b/g,n.L],[/\bal Ladro\b/g,'a '+n.L],[/\bdel Ladro\b/g,'di '+n.L],[/\bdal Ladro\b/g,'da '+n.L],[/\bLadro\b/g,n.L]);
   R.push([/\b[Ll]a Polizia\b/g,n.P],[/\b([Aa])lla Polizia\b/g,'$1 '+n.P],[/\b([Dd])ella Polizia\b/g,'$1i '+n.P],[/\b([Dd])alla Polizia\b/g,'$1a '+n.P],[/\bPolizia\b/g,n.P]);
   R.push([/\b(l|L|dell|Dell|all|All|nell|Nell|dall|Dall|sull|Sull)[’']Esposizione\b/g,'$1a '+t.Esposizione],[/\b([Uu])n[’']Esposizione\b/g,'$1na '+t.Esposizione]);
@@ -621,7 +625,7 @@ async function falsaPista(tD){
   if(!isHuman('L'))await pause(`<h2 class="who-L">Il Ladro gioca una carta</h2>${cardHTML('falsa','L')}<p>Un suo dado passa da ${from} a ${d.v}.</p>`);
 }
 async function normalRound(R){
-  const tInfo=()=>`<p class="muted">Dadi a disposizione: ${R.nL}.${R.posto?' Posto di blocco: Difesa massima 3.':''}${R.regalo?' Regalo esplosivo: Fuga a zero, un solo dado rilanciabile.':''}${R.moto?' Moto veloce attiva.':''}${R.sabot?' Sabotaggio: la Polizia non rilancia.':''}</p>`;
+  const tInfo=()=>`<p class="muted">Dadi a disposizione: ${R.nL}.${R.posto?' Posto di blocco: Difesa massima 3.':''}${R.regalo?' Regalo esplosivo: Fuga a zero, un solo dado rilanciabile.':''}${R.moto?' Moto veloce: effetto attivo.':''}${R.sabot?' Sabotaggio: la Polizia non rilancia.':''}</p>`;
   let tD;
   if(isHuman('L'))tD=await humanRoll('L',R.nL,{maxRe:R.regalo?1:99,info:tInfo()});
   else tD=cpuRoll('L',R.nL,{maxRe:R.regalo?1:99});
@@ -702,7 +706,7 @@ async function resolveRound(R){
   else if(def>spar){plost=Math.min(G.I,(def-spar)*(R.regalo?2:1));G.I-=plost;line+=`la Polizia perde ${plost}${R.regalo?' (doppio, Regalo esplosivo)':''}.`}
   else line+='parità, nessuno perde punti.';
   log(line,'S');
-  const dv=d=>d.expo?`${d.v}<small> (Esp.)</small>`:d.v;
+  const dv=d=>d.expo?`${d.v}<small> (Esposizione)</small>`:d.v;
   const calc=()=>{
     const gain=[
       crow(`${NAME.L} · Fuga`,`${R.tA.fuga.map(d=>d.v).join(' + ')}${R.tA.fuga.length>1?` = ${sum(R.tA.fuga.map(d=>d.v))}`:''}${R.regalo?' → vale 0 per Regalo esplosivo':''}`,`+${R.fugaGain}`,'L'),
@@ -743,7 +747,7 @@ async function humanConf(s,final){
   r.type=await choose(`<h2 class="who-${s}">${final?'Confronto finale':'Confronto di fine fase'}</h2>
     <p>Scegli in segreto la tua mossa. L’avversario sceglie nello stesso momento.</p>
     <div class="seg"><div class="opt"><b>Rapido</b><small>${nd} dadi, conti solo il più alto. Massimo 6.</small></div>
-    <div class="opt"><b>Disperato</b><small>${nd===3?'3 dadi, sommi i due più alti':'2 dadi sommati'}. Se ${nd===3?'uno dei due conservati':'uno'} è 1, vale zero. Fino a 12.</small></div></div>`,
+    <div class="opt"><b>Disperato</b><small>${nd===3?'Lanci 3 dadi e sommi i due più alti':'Somma i due dadi'}. Se almeno uno dei due è 1, il tiro è nullo.</small></div></div>`,
     [['R','Rapido'],['D','Disperato']]);
   let v=Array.from({length:nd},()=>rnd(6));
   const show=(t)=>`<h2 class="who-${s}">${r.type==='R'?'Rapido':'Disperato'}</h2><div class="tray">${v.map(x=>dieHTML({v:x,side:s},'new static')).join('')}</div><p>${t}</p>`;
