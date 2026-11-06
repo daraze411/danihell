@@ -206,6 +206,7 @@ body.nocalc .calc{display:none}
 .calctog{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;font-family:var(--label);font-weight:700;font-size:13px;cursor:pointer;margin-top:4px;white-space:nowrap}
 .calctog[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 details summary{cursor:pointer;font-family:var(--label);font-weight:700;font-size:17px}
+.topbar{gap:12px}.home{min-height:40px;padding:6px 14px;font-size:15px}
 .howto{margin:8px 0 0;padding-left:22px;display:flex;flex-direction:column;gap:6px;font-size:15px}
 details ul{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:15px}
 .toast{background:var(--good);color:#fff;border-radius:10px;padding:10px 14px;font-weight:600}
@@ -357,11 +358,16 @@ function log(t,c=''){G.log.unshift({t,c});renderLog()}
 
 function shell(){
   app.innerHTML=`
-  
+  <div class="row topbar"><button class="btn home" id="home"><span aria-hidden="true">←</span> Home</button><span class="muted" id="homehint"></span></div>
   <section class="board" id="board"></section>
   <section class="panel stage" id="stage" aria-live="polite"></section>
   <section class="panel"><div class="row" style="justify-content:space-between"><span class="lbl">Verbale</span>
     <button class="mini" id="quit">Abbandona partita</button></div><ul class="log" id="log"></ul></section>`;
+  let armed=false;
+  const leave=()=>{if(!armed){armed=true;document.getElementById('home').textContent='Esci: la partita andrà persa';document.getElementById('homehint').textContent='Tocca di nuovo per tornare alla home';
+      setTimeout(()=>{armed=false;const h=document.getElementById('home');if(h){h.innerHTML='<span aria-hidden="true">←</span> Home';document.getElementById('homehint').textContent=''}},4000);return}
+    G.abort=true;G=null;menu()};
+  document.getElementById('home').onclick=leave;
   document.getElementById('quit').onclick=()=>{G.abort=true;G=null;menu()};
 }
 function renderBoard(){
@@ -699,18 +705,18 @@ async function resolveRound(R){
   const dv=d=>d.expo?`${d.v}<small> (Esp.)</small>`:d.v;
   const calc=()=>{
     const gain=[
-      crow('Fuga',`${R.tA.fuga.map(d=>d.v).join(' + ')}${R.tA.fuga.length>1?` = ${sum(R.tA.fuga.map(d=>d.v))}`:''}${R.regalo?' → vale 0 per Regalo esplosivo':''}`,`+${R.fugaGain}`,'L'),
-      crow('Inseguimento',`${dv(insDie)}${pen?` − 2 per la Raffica${insDie.v<2?', minimo 0':''}`:R.raffica?' (Raffica senza penalità: Fuoco di copertura)':''}`,`+${ins}`,'P')];
+      crow(`${NAME.L} · Fuga`,`${R.tA.fuga.map(d=>d.v).join(' + ')}${R.tA.fuga.length>1?` = ${sum(R.tA.fuga.map(d=>d.v))}`:''}${R.regalo?' → vale 0 per Regalo esplosivo':''}`,`+${R.fugaGain}`,'L'),
+      crow(`${NAME.P} · Inseguimento`,`${dv(insDie)}${pen?` − 2 per la Raffica${insDie.v<2?', minimo 0':''}`:R.raffica?' (Raffica senza penalità: Fuoco di copertura)':''}`,`+${ins}`,'P')];
     const fight=[
-      crow('Difesa',`${R.tA.dif.map(d=>d.v).join(' + ')}${R.tA.dif.length>1?` = ${difRaw}`:''}${R.posto&&difRaw>3?' → limite 3 per Posto di blocco':''}`,def),
-      crow('Sparatoria',`${sparDice.map(dv).join(' + ')}${R.supBonus?` + ${R.supBonus} Supporto aereo (metà di ${Math.max(...R.tA.fuga.map(d=>d.v))}, per eccesso)`:''}${sparDice.length>1||R.supBonus?` = ${spar}`:''}`,spar)];
+      crow(`${NAME.L} · Difesa`,`${R.tA.dif.map(d=>d.v).join(' + ')}${R.tA.dif.length>1?` = ${difRaw}`:''}${R.posto&&difRaw>3?' → limite 3 per Posto di blocco':''}`,def),
+      crow(`${NAME.P} · Sparatoria`,`${sparDice.map(dv).join(' + ')}${R.supBonus?` + ${R.supBonus} Supporto aereo (metà di ${Math.max(...R.tA.fuga.map(d=>d.v))}, per eccesso)`:''}${sparDice.length>1||R.supBonus?` = ${spar}`:''}`,spar)];
     if(spar>def)fight.push(crow('Danno al Ladro',`${spar} − ${def} = ${spar-def}${lost<spar-def?` → la Fuga non scende sotto zero, si perdono solo ${lost}`:''}`,`−${lost}`,'neg'));
     else if(def>spar)fight.push(crow('Danno alla Polizia',`${def} − ${spar} = ${def-spar}${R.regalo?` × 2 Regalo esplosivo = ${(def-spar)*2}`:''}${plost<(def-spar)*(R.regalo?2:1)?` → l’Inseguimento non scende sotto zero, si perdono solo ${plost}`:''}`,`−${plost}`,'neg'));
     else fight.push(crow('Danno',`${spar} = ${def}: parità`,'0'));
     if(back)fight.push(crow('Rifugio segreto',`recupera fino a 3 dei ${lost} persi`,`+${back}`,'L'));
     const tot=[
-      crow('Fuga',`${F0} + ${R.fugaGain}${lost?` − ${lost}`:''}${back?` + ${back}`:''}`,G.F,'L tot'),
-      crow('Inseguimento',`${I0} + ${ins}${plost?` − ${plost}`:''}`,G.I,'P tot')];
+      crow(`${NAME.L} · Fuga`,`${F0} + ${R.fugaGain}${lost?` − ${lost}`:''}${back?` + ${back}`:''}`,G.F,'L tot'),
+      crow(`${NAME.P} · Inseguimento`,`${I0} + ${ins}${plost?` − ${plost}`:''}`,G.I,'P tot')];
     return calcBox([csec('Punti del round',gain),csec('Sparatoria contro Difesa',fight),csec('Nuovi punteggi',tot)]);
   };
   const head=()=>`<h2>Risoluzione del round ${G.round}</h2>
@@ -732,15 +738,15 @@ async function resolveRound(R){
 const confVal=(type,v)=>{if(type==='R')return Math.max(...v);const t=[...v].sort((a,b)=>b-a).slice(0,2);return t.includes(1)?0:t[0]+t[1]};
 async function humanConf(s,final){
   const r={rinforzi:false,falsa:false};
-  if(final&&s==='P'&&hasCard('P','rinforzi')){r.rinforzi=await askCard('P','<p class="muted">Confronto finale, prima di scegliere l’intervento.</p>');if(r.rinforzi)useCard('P')}
+  if(final&&s==='P'&&hasCard('P','rinforzi')){r.rinforzi=await askCard('P','<p class="muted">Confronto finale, prima di scegliere la mossa.</p>');if(r.rinforzi)useCard('P')}
   const nd=r.rinforzi?3:2;
   r.type=await choose(`<h2 class="who-${s}">${final?'Confronto finale':'Confronto di fine fase'}</h2>
-    <p>Scegli in segreto l’intervento. L’avversario sceglie nello stesso momento.</p>
-    <div class="seg"><div class="opt"><b>Intervento rapido</b><small>${nd} dadi, conti solo il più alto. Massimo 6.</small></div>
-    <div class="opt"><b>Intervento disperato</b><small>${nd===3?'3 dadi, sommi i due più alti':'2 dadi sommati'}. Se ${nd===3?'uno dei due conservati':'uno'} è 1, vale zero. Fino a 12.</small></div></div>`,
+    <p>Scegli in segreto la tua mossa. L’avversario sceglie nello stesso momento.</p>
+    <div class="seg"><div class="opt"><b>Rapido</b><small>${nd} dadi, conti solo il più alto. Massimo 6.</small></div>
+    <div class="opt"><b>Disperato</b><small>${nd===3?'3 dadi, sommi i due più alti':'2 dadi sommati'}. Se ${nd===3?'uno dei due conservati':'uno'} è 1, vale zero. Fino a 12.</small></div></div>`,
     [['R','Rapido'],['D','Disperato']]);
   let v=Array.from({length:nd},()=>rnd(6));
-  const show=(t)=>`<h2 class="who-${s}">${r.type==='R'?'Intervento rapido':'Intervento disperato'}</h2><div class="tray">${v.map(x=>dieHTML({v:x,side:s},'new static')).join('')}</div><p>${t}</p>`;
+  const show=(t)=>`<h2 class="who-${s}">${r.type==='R'?'Rapido':'Disperato'}</h2><div class="tray">${v.map(x=>dieHTML({v:x,side:s},'new static')).join('')}</div><p>${t}</p>`;
   const again=await choose(show(`Risultato: <b class="num">${confVal(r.type,v)}</b>. Puoi rilanciare una volta tutti i dadi.`),[[false,'Accetta'],[true,'Rilancia tutti']]);
   if(again){r.first=[...v];v=v.map(()=>rnd(6))}
   if(final&&s==='L'&&hasCard('L','falsa')){
@@ -785,9 +791,9 @@ async function confronto(final){
     if(r.falsa)rows.push(crow('Falsa pista',`${r.falsa[0]} + 3 = ${r.falsa[0]+3}${r.falsa[0]+3>6?', massimo 6':''}`,r.falsa[1]));
     const srt=[...v].sort((a,b)=>b-a);
     if(r.type==='R')rows.push(crow('Rapido',`${v.length===3?'3 dadi (Rinforzi) ':''}${v.join(' · ')} → conta il più alto`,`+${r.val}`,s));
-    else{const k=srt.slice(0,2);rows.push(crow('Disperato',`${v.length===3?`3 dadi (Rinforzi) ${v.join(' · ')} → si tengono ${k.join(' e ')}, `:''}${k.includes(1)?`${k.join(' + ')}: c’è un 1, l’intervento fallisce`:`${k[0]} + ${k[1]}`}`,`+${r.val}`,s))}
+    else{const k=srt.slice(0,2);rows.push(crow('Disperato',`${v.length===3?`3 dadi (Rinforzi) ${v.join(' · ')} → si tengono ${k.join(' e ')}, `:''}${k.includes(1)?`${k.join(' + ')}: c’è un 1, la mossa fallisce`:`${k[0]} + ${k[1]}`}`,`+${r.val}`,s))}
     return csec(NAME[s],rows)};
-  const tot=csec('Nuovi punteggi',[crow('Fuga',`${F0} + ${res.L.val}`,G.F,'L tot'),crow('Inseguimento',`${I0} + ${res.P.val}`,G.I,'P tot')]);
+  const tot=csec('Nuovi punteggi',[crow(`${NAME.L} · Fuga`,`${F0} + ${res.L.val}`,G.F,'L tot'),crow(`${NAME.P} · Inseguimento`,`${I0} + ${res.P.val}`,G.I,'P tot')]);
   await pause(`<h2>Interventi rivelati</h2><div class="zones">${col('L')}${col('P')}</div>${calcBox([how('L'),how('P'),tot])}`);
 }
 
@@ -991,7 +997,7 @@ function menu(){
    <section class="panel"><span class="lbl">Reward sbloccati</span><div id="rewards" style="display:flex;flex-direction:column;gap:10px"></div></section>`;
   const sync=()=>{app.querySelectorAll('[data-r]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===role));
     app.querySelectorAll('[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode))};
-  app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{if(role===b.dataset.r)return;P.last.role=b.dataset.r;P.last.mode=mode;save();menu()});
+  app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{if(role===b.dataset.r)return;P.last.role=b.dataset.r;P.last.mode=mode;save();const y=window.scrollY;menu();window.scrollTo(0,y);const nb=app.querySelector(`[data-r="${b.dataset.r}"]`);if(nb)nb.focus({preventScroll:true})});
   app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{if(!b.disabled){mode=b.dataset.m;sync()}});
   sync();
   app.querySelector('#start').onclick=()=>playGame({role,mode});
