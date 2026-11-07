@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#130d0f">
+<link rel="manifest" href="manifest.webmanifest">
 <meta name="application-name" content="DANIHELL">
 <meta name="apple-mobile-web-app-title" content="DANIHELL">
 <meta name="mobile-web-app-capable" content="yes">
@@ -36,12 +37,13 @@
 }
 
 
+body{--thief:var(--luci);--thief-soft:var(--luci-soft);--police:var(--dmetal);--police-soft:var(--dmetal-soft)}
 body.mode-L{--thief:var(--dnerd);--thief-soft:var(--dnerd-soft);--police:var(--luci);--police-soft:var(--luci-soft)}
 /* Reward: Tema Cozy — maglione di lana e camomilla, un solo aspetto voluto */
 body.cozy{
   --bg:#ead9c2; --surface:#f6ead8; --surface2:#efdcc1; --ink:#3a2418; --muted:#7a5a44; --line:#d4b896;
   --luci:#a8321a; --luci-soft:#f0cdb4; --dmetal:#8a5a00; --dmetal-soft:#f1dcae; --dnerd:#2f6b45; --dnerd-soft:#d4e3c4;
-  --accent:#b5562b; --accent-ink:#fff6ea; --dieL:#fff6e6; --dieP:#fff6e6; --die-edge:#c9a77e; --stripe:#3a2418; color-scheme:light}
+  --accent:#b5562b; --accent-ink:#fff6ea; --good:#2b8150; --bad:#b8452f; --dieL:#fff6e6; --dieP:#fff6e6; --die-edge:#c9a77e; --stripe:#3a2418; color-scheme:light}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;
