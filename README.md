@@ -37,7 +37,7 @@ Nella partita lampo, a una sola fase, non ci sono confronti né carte.
 
 ## Dossier e reward
 
-Completando i traguardi si chiudono quattro dossier: Meshuggah, Roadburn, Nervi d'acciaio e Leggenda dei 40. Sbloccano la modalità Esperti, i dadi infernali, il tema Cozy e la setlist dell'album *Brutal Cozy Metal*. I progressi restano salvati nel browser di chi gioca.
+Completando i traguardi si chiudono quattro dossier: Meshuggah, Roadburn, Pane Asimov e Leggenda dei 40. Sbloccano la modalità Esperti, i dadi infernali, il tema Cozy e la setlist dell'album *Brutal Cozy Metal*. I progressi restano salvati nel browser di chi gioca.
 
 ---
 
