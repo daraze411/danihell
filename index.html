@@ -207,6 +207,11 @@ body.nocalc .calc{display:none}
 .calctog[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 details summary{cursor:pointer;font-family:var(--label);font-weight:700;font-size:17px}
 .topbar{gap:12px}
+.tokdot{font-size:13px;color:var(--muted);font-family:var(--label);font-weight:600}
+.tokdot.on{color:var(--police)}
+.tokinfo{margin:0;font-size:14px;color:var(--police);font-weight:600}
+.mini.tokb{border-color:var(--police);color:var(--police)}
+.die.tokd::after{content:"●";position:absolute;top:-8px;right:-8px;background:var(--police);color:var(--bg);border-radius:50%;width:18px;height:18px;font-size:11px;line-height:18px;text-align:center}
 .lossvid{position:relative;border-radius:12px;overflow:hidden;border:2px solid var(--luci);background:#000;aspect-ratio:16/9;max-width:100%}
 .lossvid video{width:100%;height:100%;object-fit:cover;display:block}
 .lossvid .mini{position:absolute;right:max(10px,env(safe-area-inset-right,0px));bottom:10px;font-size:14px;padding:6px 12px}
@@ -393,7 +398,7 @@ function renderBoard(){
      <span class="who">Ladro · ${isHuman('L')?'tu':'CPU'}</span><div class="held">${held('L')}</div></div>
    <div class="mid"><b>${rd}</b><span class="lbl">${ph}${G.expert?' · Esperti':''}</span>${calcBtn()}</div>
    <div class="side P"><span class="lbl">Inseguimento</span><span class="score num">${G.I}</span>
-     <span class="who">Polizia · ${isHuman('P')?'tu':'CPU'}</span><div class="held" style="justify-content:flex-end">${held('P')}</div></div>`;
+     <span class="who">Polizia · ${isHuman('P')?'tu':'CPU'}</span><span class="tokdot ${G.tok?'on':''}" title="${G.tok?'Gettone disponibile':'Gettone già usato o non disponibile'}">${G.tok?'●':'○'} gettone</span><div class="held" style="justify-content:flex-end">${held('P')}</div></div>`;
 }
 function calcBtn(){const on=P.prefs.calc!==false;return `<button class="calctog" data-calc aria-pressed="${on}">Calcoli: ${on?'sì':'no'}</button>`}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-calc]');if(!b)return;
@@ -458,8 +463,9 @@ function rollStory(dice,side){
 function assignStory(a,zones,dice,side){
   const used=new Set();
   const rows=zones.map(z=>{const ds=a[z.key];ds.forEach(d=>used.add(d.id));
-    const red=ds.filter(d=>!d.expo).map(d=>{const o=dice.find(x=>x.id===d.id);return o&&o.v!==d.v?`${o.v}→${d.v}`:null}).filter(Boolean);
-    return `<div class="row"><b style="min-width:7.5em">${z.label}</b>${ds.map(d=>dieHTML(d,'sm static')).join('')}<b class="num">= ${sum(ds.map(d=>d.v))}</b>${red.length?`<span class="muted">ridotto ${red.join(', ')}</span>`:''}${ds.some(d=>d.expo)?'<span class="muted">(Esposizione)</span>':''}</div>`});
+    const red=ds.filter(d=>!d.expo&&!d.tok).map(d=>{const o=dice.find(x=>x.id===d.id);return o&&o.v!==d.v?`${o.v}→${d.v}`:null}).filter(Boolean);
+    const tk=ds.filter(d=>d.tok).map(d=>{const o=dice.find(x=>x.id===d.id);return `${o?o.v:d.v-1}→${d.v}`});
+    return `<div class="row"><b style="min-width:7.5em">${z.label}</b>${ds.map(d=>dieHTML(d,'sm static')).join('')}<b class="num">= ${sum(ds.map(d=>d.v))}</b>${red.length?`<span class="muted">ridotto ${red.join(', ')}</span>`:''}${tk.length?`<span class="tokinfo" style="margin:0">● modificato ${tk.join(', ')} con il gettone</span>`:''}${ds.some(d=>d.expo)?'<span class="muted">(Esposizione)</span>':''}</div>`});
   const unused=dice.filter(d=>!used.has(d.id)&&!d.expo);
   if(unused.length)rows.push(`<div class="row"><span class="lbl" style="min-width:7.5em">Inutilizzati</span>${unused.map(d=>dieHTML(d,'sm static')).join('')}</div>`);
   return `<div style="display:flex;flex-direction:column;gap:8px">${rows.join('')}</div>`;
@@ -474,29 +480,41 @@ function humanAssign({side,dice,zones,validate,info=''}){
   return ui('',(st,res)=>{
     const place={},val={};dice.forEach(d=>{val[d.id]=d.v;place[d.id]=null});
     let sel=null;const openInfo=new Set();
+    const canTok=side==='P'&&G.tok;let tok=null;
+    const sidesOf=id=>(dice.find(d=>d.id===id)||{}).sides||6;
     const build=()=>{const a={};zones.forEach(z=>a[z.key]=[]);dice.forEach(d=>{if(place[d.id])a[place[d.id]].push({...d,v:val[d.id]})});return a};
+    const finalize=()=>{const a=build();if(tok){const t=a[place[tok.id]].find(d=>d.id===tok.id);if(t){t.tok=true;a.tok={from:val[tok.id]-tok.d,to:val[tok.id]}}}return a};
+    const tokBtns=d=>{if(!canTok||d.expo)return '';
+      if(tok&&tok.id===d.id)return `<button class="mini tokb" data-tok="${d.id}|x">Annulla ●</button>`;
+      if(tok)return '';
+      return `${val[d.id]<sidesOf(d.id)?`<button class="mini tokb" data-tok="${d.id}|1">+1 ●</button>`:''}${!G.expert&&val[d.id]>1?`<button class="mini tokb" data-tok="${d.id}|-1">−1 ●</button>`:''}`};
     const draw=()=>{
       const a=build(),err=validate(a);
       const tray=dice.filter(d=>!place[d.id]);
-      const dz=d=>dieHTML({...d,v:val[d.id]},(sel===d.id?'sel ':'')+(val[d.id]<d.v?'reduced':''),`tabindex="0" role="button" data-id="${d.id}"`);
+      const dz=d=>dieHTML({...d,v:val[d.id]},(sel===d.id?'sel ':'')+(tok&&tok.id===d.id?'tokd':val[d.id]<d.v?'reduced':''),`tabindex="0" role="button" data-id="${d.id}"`);
       st.innerHTML=`<h2 class="who-${side}">Assegna i dadi · ${NAME[side]}</h2>${info}
        <p class="muted">Tocca un dado, poi la zona in cui collocarlo. Tocca un dado già collocato per riportarlo indietro.${G.expert?' In modalità Esperti puoi ridurre un dado collocato con “−1”.':''}</p>
+       ${canTok?`<p class="tokinfo">● Hai il gettone di questa fase: sotto un tuo dado collocato puoi alzarlo${G.expert?'':' o abbassarlo'} di 1. Non vale sull’Esposizione. Se non lo usi entro la fine della fase, lo perdi.</p>`:''}
        <div class="tray" aria-label="dadi da assegnare">${tray.map(dz).join('')||'<span class="muted">Tutti i dadi sono collocati. Quelli inutili puoi lasciarli qui.</span>'}</div>
        <div class="zones">${zones.map(z=>{const ds=dice.filter(d=>place[d.id]===z.key);
          return `<div class="zone ${sel!==null?'target':''}" tabindex="0" role="button" data-z="${z.key}">
            <div class="zh"><b title="${esc(tr(ZINFO[z.key]||''))}">${z.label}</b><span class="zh2"><span class="zs num">${sum(ds.map(d=>val[d.id]))}</span>${ZINFO[z.key]?`<button class="info" data-info="${z.key}" aria-label="Cos’è ${z.label}" aria-expanded="${openInfo.has(z.key)}">?</button>`:''}</span></div>
            <span class="lbl">${z.hint}</span>${openInfo.has(z.key)?`<p class="zinfo">${ZINFO[z.key]}</p>`:''}
-           <div class="slots">${ds.map(d=>`<div class="slotdie">${dz(d)}${G.expert&&!d.expo&&val[d.id]>1?`<button class="mini" data-red="${d.id}">−1</button>`:''}</div>`).join('')}</div></div>`}).join('')}</div>
+           <div class="slots">${ds.map(d=>`<div class="slotdie">${dz(d)}${G.expert&&!d.expo&&val[d.id]>1?`<button class="mini" data-red="${d.id}">−1</button>`:''}${tokBtns(d)}</div>`).join('')}</div></div>`}).join('')}</div>
        <div class="err">${err||''}</div>
-       <div class="row"><button class="btn primary" id="done" ${err?'disabled':''}>Conferma</button></div>`;
+       <div class="row"><button class="btn primary" id="done" ${err?'disabled':''}>${tok?'Conferma · usi il gettone ●':'Conferma'}</button></div>`;
       st.querySelectorAll('[data-id]').forEach(el=>{const t=e=>{e.stopPropagation();const id=isNaN(+el.dataset.id)?el.dataset.id:+el.dataset.id;
-        if(place[id]){place[id]=null;val[id]=dice.find(d=>d.id===id).v;sel=null}else sel=(sel===id?null:id);draw()};
+        if(place[id]){place[id]=null;val[id]=dice.find(d=>d.id===id).v;if(tok&&tok.id===id)tok=null;sel=null}else sel=(sel===id?null:id);draw()};
         el.onclick=t;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t(e)}}});
       st.querySelectorAll('[data-info]').forEach(b=>b.onclick=e=>{e.stopPropagation();const k=b.dataset.info;openInfo.has(k)?openInfo.delete(k):openInfo.add(k);draw()});
       st.querySelectorAll('[data-z]').forEach(el=>{const t=()=>{if(sel===null)return;place[sel]=el.dataset.z;sel=null;draw()};
         el.onclick=t;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t()}}});
       st.querySelectorAll('[data-red]').forEach(b=>b.onclick=e=>{e.stopPropagation();const id=isNaN(+b.dataset.red)?b.dataset.red:+b.dataset.red;val[id]=Math.max(1,val[id]-1);draw()});
-      const done=st.querySelector('#done');done.onclick=()=>{if(!validate(build()))res(build())};
+      st.querySelectorAll('[data-tok]').forEach(b=>b.onclick=e=>{e.stopPropagation();const [r,op]=b.dataset.tok.split('|');const id=isNaN(+r)?r:+r;
+        if(op==='x'){if(tok){val[id]=Math.max(1,val[id]-tok.d);tok=null}}
+        else{const dd=+op;const nv=val[id]+dd;if(nv>=1&&nv<=sidesOf(id)){val[id]=nv;tok={id,d:dd}}}
+        draw()});
+      const done=st.querySelector('#done');done.onclick=()=>{if(!validate(build()))res(finalize())};
     };draw();
   });
 }
@@ -525,6 +543,22 @@ const ZINFO={fuga:'Il valore va dritto nei punti Fuga del Ladro: più è alto, m
   expo:'Questo dado passa alla Polizia capovolto: 1↔6, 2↔5, 3↔4. Un dado alto qui arriva alla Polizia come un dado basso.',
   ins:'Il valore va dritto nei punti Inseguimento della Polizia. Qui puoi usare anche il dado Esposizione ricevuto dal Ladro.',
   spar:'Si somma e si confronta con la Difesa del Ladro. Se la Sparatoria è più alta, il Ladro perde la differenza in punti Fuga; se è più bassa, la perde la Polizia.'};
+function humanTok(a){if(a&&a.tok){G.tok=false;log(`${NAME.P} usa il gettone: un dado passa da ${a.tok.from} a ${a.tok.to}.`,'P')}return a}
+function cpuTok(a,R,zones,validate,basista){
+  if(!G.tok||!a)return a;
+  const up=d=>!d.expo&&d.v<(d.sides||6);
+  let where=null;
+  if(!basista){const spar=sum(a.spar.map(d=>d.v))+(R.supBonus||0),gap=R.defTot-spar;
+    if(gap===0||gap===1){const c=a.spar.filter(up).sort((x,y)=>x.v-y.v)[0];if(c)where=['spar',c.id]}}
+  if(!where&&G.round===3){const i=a.ins[0];if(up(i))where=['ins',i.id];else{const c=a.spar.filter(up)[0];if(c)where=['spar',c.id]}}
+  if(!where)return a;
+  const b={};zones.forEach(z=>b[z.key]=a[z.key].map(d=>({...d})));
+  const t=b[where[0]].find(d=>d.id===where[1]),from=t.v;t.v=from+1;t.tok=true;
+  if(validate(b))return a;
+  b.tok={from,to:t.v};G.tok=false;
+  log(`${NAME.P} (CPU) usa il gettone: un dado passa da ${from} a ${t.v}.`,'P');
+  return b;
+}
 function policeZones(need){return [{key:'ins',label:'Inseguimento',min:1,max:1,hint:'1 dado · punti Inseguimento'},{key:'spar',label:'Sparatoria',min:need,max:need,hint:`${need} ${need===1?'dado':'dadi'} · contro la Difesa`}]}
 function policeValidate(zones,dice){return a=>{
   const e=countErr(a,zones);if(e)return e;
@@ -673,7 +707,7 @@ async function normalRound(R){
   if(G.abort)return;
   const all=[...pD,ex],pz=policeZones(need);
   const pInfo=thiefBox+`<p class="muted">Servono 1 Inseguimento e ${need} Sparatoria. Il dado Esposizione (bordo tratteggiato) va usato in una delle due.${R.supBonus?` Supporto aereo: +${R.supBonus} alla Sparatoria.`:''}</p>`;
-  R.pA=isHuman('P')?await humanAssign({side:'P',dice:all,zones:pz,validate:policeValidate(pz,all),info:pInfo}):cpuPolice(all,R,need);
+  R.pA=isHuman('P')?humanTok(await humanAssign({side:'P',dice:all,zones:pz,validate:policeValidate(pz,all),info:pInfo})):cpuTok(cpuPolice(all,R,need),R,pz,policeValidate(pz,all),false);
   if(G.abort)return;
   if(!isHuman('P'))await cpuPanel('P','Turno della Polizia (CPU)',`<p>${R.raffica?`Dichiara una <b>Raffica</b>${R.fuoco?' senza penalità (Fuoco di copertura)':' (−2 all’Inseguimento)'}.`:R.regalo?'Non può dichiarare la Raffica (Regalo esplosivo).':'Non dichiara la Raffica.'} Riceve l’Esposizione come ${expoV}.</p>
     <span class="lbl">Lancia ${R.nP+(R.rinforzi?1:0)} dadi${R.motore?', uno a dieci facce':''}</span>${rollStory(pD,'P')}<span class="lbl">Assegnazioni</span>${assignStory(R.pA,pz,all,'P')}
@@ -688,7 +722,7 @@ async function basistaRound(R){
   const pD=isHuman('P')?await humanRoll('P',R.nP,{}):cpuRoll('P',R.nP,{});
   if(G.abort)return;
   const pz=policeZones(need);
-  R.pA=isHuman('P')?await humanAssign({side:'P',dice:pD,zones:pz,validate:policeValidate(pz,pD)}):cpuPolice(pD,{...R,basista:true},need);
+  R.pA=isHuman('P')?humanTok(await humanAssign({side:'P',dice:pD,zones:pz,validate:policeValidate(pz,pD)})):cpuTok(cpuPolice(pD,{...R,basista:true},need),R,pz,policeValidate(pz,pD),true);
   if(G.abort)return;
   if(isHuman('P')){trackHuman(R.pA.spar.map(d=>d.v),'spar');trackHuman(R.pA.ins.map(d=>d.v),'x')}
   R.pA.sparTot=sum(R.pA.spar.map(d=>d.v));
@@ -720,7 +754,7 @@ async function resolveRound(R){
   else if(def>spar){plost=Math.min(G.I,(def-spar)*(R.regalo?2:1));G.I-=plost;line+=`la Polizia perde ${plost}${R.regalo?' (doppio, Regalo esplosivo)':''}.`}
   else line+='parità, nessuno perde punti.';
   log(line,'S');
-  const dv=d=>d.expo?`${d.v}<small> (Esposizione)</small>`:d.v;
+  const dv=d=>d.expo?`${d.v}<small> (Esposizione)</small>`:d.tok?`${d.v}<small> (gettone)</small>`:d.v;
   const calc=()=>{
     const gain=[
       crow(`${NAME.L} · Fuga`,`${R.tA.fuga.map(d=>d.v).join(' + ')}${R.tA.fuga.length>1?` = ${sum(R.tA.fuga.map(d=>d.v))}`:''}${R.regalo?' → vale 0 per Regalo esplosivo':''}`,`+${R.fugaGain}`,'L'),
@@ -822,18 +856,21 @@ const SKEY='danihell-partita';
 function readSave(){try{const x=JSON.parse(localStorage.getItem(SKEY)||'null');return x&&x.G&&x.cfg?x:null}catch(e){return null}}
 function clearSave(){try{localStorage.removeItem(SKEY)}catch(e){}}
 async function playGame(cfg,saved){
-  if(saved){G=saved.G;G.abort=false}else G={human:cfg.role,mode:cfg.mode==='travel'?'travel':'full',expert:cfg.mode==='expert',F:0,I:2,phase:1,round:1,stage:'round',
+  if(saved){G=saved.G;G.abort=false}else G={human:cfg.role,mode:cfg.mode==='travel'?'travel':'full',expert:cfg.mode==='expert',F:0,I:1,tok:false,phase:1,round:1,stage:'round',
      cards:{L:null,P:null},used:{L:false,P:false},log:[],t:{usedCard:false,one:false,six:false,failedD:false}};
   setMode(G.human);
   shell();
   if(saved){renderBoard();log('Partita ripresa dall’inizio del round in cui era stata interrotta.','S')}
-  else{log(`La Polizia parte con 2 punti Inseguimento.`,'S');
+  else{log(`La Polizia parte con 1 punto Inseguimento.`,'S');
   log(`Nuova partita: tu sei ${G.human==='P'?'Dani il Metallaro':'Dani il Nerd'}${G.expert?', modalità Esperti':''}${G.mode==='travel'?', variante da viaggio':''}.`,'S')}
   const phases=G.mode==='travel'?1:2,from=saved?saved.k:0;let k=0;
   const cp=()=>{try{const g={...G};delete g.abort;localStorage.setItem(SKEY,JSON.stringify({k,cfg,G:g}))}catch(e){}};
   for(let ph=1;ph<=phases;ph++){
     if(ph===2){if(k>=from){G.phase=ph;cp();await drawCards();if(G.abort)return}k++}
-    for(let r=1;r<=3;r++){if(k>=from){G.phase=ph;G.round=r;G.stage='round';cp();await playRound();if(G.abort)return}k++}
+    for(let r=1;r<=3;r++){if(k>=from){G.phase=ph;G.round=r;G.stage='round';cp();
+      if(r===1){G.tok=true;log(`La Polizia riceve il gettone della fase ${ph} ●.`,'P')}
+      await playRound();if(G.abort)return;
+      if(r===3&&ph<phases&&G.tok){G.tok=false;log('Il gettone della Polizia non è stato usato in questa fase: va perso.','P')}}k++}
     if(ph<phases){if(k>=from){G.phase=ph;cp();await confronto(false);if(G.abort)return}k++}
   }
   clearSave();finish();
@@ -841,23 +878,23 @@ async function playGame(cfg,saved){
 const CPU_PREF={L:['rifugio','falsa','moto','sabot','basista','regalo'],P:['rinforzi','motore','supporto','fuoco','tiratore','posto']};
 async function drawCards(){
   G.stage='draw';
-  // Tutti pescano: chi è avanti (o in parità) pesca 1 carta, chi è indietro ne pesca 2 e ne tiene una
+  // Chi è indietro sceglie una carta tra tutte quelle del suo mazzo; chi è avanti ne pesca una a caso; in parità entrambi pescano a caso
   const behind=G.F<G.I?'L':G.I<G.F?'P':null;
-  const deal=(s,n)=>{const deck=[...CARDS[s]].sort(()=>Math.random()-.5);return deck.slice(0,n).map(c=>c.id)};
-  const hands={L:deal('L',behind==='L'?2:1),P:deal('P',behind==='P'?2:1)};
+  const pickRandom=s=>CARDS[s][Math.floor(Math.random()*CARDS[s].length)].id;
   const h=G.human,c=opp(h);
-  G.cards[c]=hands[c].length>1?[...hands[c]].sort((a,b)=>CPU_PREF[c].indexOf(a)-CPU_PREF[c].indexOf(b))[0]:hands[c][0];
-  const intro=`<h2>Pesca delle carte</h2>
-    <p>Fine della prima fase: Fuga <b class="num">${G.F}</b>, Inseguimento <b class="num">${G.I}</b>. ${behind?`È indietro ${behind==='L'?'il Ladro':'la Polizia'}: pesca due carte e ne tiene una. L’altro giocatore ne pesca una.`:'Parità: ognuno pesca una carta.'}</p>`;
-  if(hands[h].length>1){
-    G.cards[h]=await ui(intro+`<p>Sei indietro: scegli quale carta tenere. L’altra torna nel mazzo.</p>
-      <div class="zones">${hands[h].map((id,i)=>`<div style="display:flex;flex-direction:column;gap:8px">${cardHTML(id,h)}<button class="btn primary" data-k="${i}">Tieni ${esc(cardById(id).n)}</button></div>`).join('')}</div>`,
-      (st,res)=>st.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>res(hands[h][+b.dataset.k])));
+  if(behind===c){const top=CPU_PREF[c].slice(0,3);G.cards[c]=top[Math.floor(Math.random()*top.length)]}
+  else G.cards[c]=pickRandom(c);
+  const intro=`<h2>Carte azione</h2>
+    <p>Fine della prima fase: Fuga <b class="num">${G.F}</b>, Inseguimento <b class="num">${G.I}</b>. ${behind?`È indietro ${behind==='L'?'il Ladro':'la Polizia'}: sceglie una carta tra tutte quelle del suo mazzo. ${behind==='L'?'La Polizia':'Il Ladro'} ne pesca una a caso.`:'Parità: entrambi pescano una carta a caso.'}</p>`;
+  if(behind===h){
+    G.cards[h]=await ui(intro+`<p>Sei indietro: guarda tutte le tue carte e scegli quella da tenere.</p>
+      <div class="zones">${CARDS[h].map(card=>`<div style="display:flex;flex-direction:column;gap:8px">${cardHTML(card.id,h)}<button class="btn primary" data-k="${card.id}">Tieni ${esc(card.n)}</button></div>`).join('')}</div>`,
+      (st,res)=>st.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>res(b.dataset.k)));
     if(G.abort)return;
-  }else G.cards[h]=hands[h][0];
-  log(`Fine prima fase: Fuga ${G.F}, Inseguimento ${G.I}. ${behind?`${NAME[behind]} pesca 2 carte e ne tiene una, ${NAME[opp(behind)]} ne pesca 1.`:'Entrambi pescano 1 carta.'}`,'S');
+  }else G.cards[h]=pickRandom(h);
+  log(`Fine prima fase: Fuga ${G.F}, Inseguimento ${G.I}. ${behind?`${NAME[behind]} sceglie la sua carta, ${NAME[opp(behind)]} ne pesca una a caso.`:'Entrambi pescano una carta a caso.'}`,'S');
   await pause(intro+`<p>La tua carta:</p>${cardHTML(G.cards[h],h)}
-    <p class="muted">Resta segreta finché non la giochi. Se non la usi entro la fine, non ha effetto. ${behind===c?'L’avversario ha pescato due carte e ne tiene una coperta.':'L’avversario tiene una carta coperta.'}</p>`,'Inizia la seconda fase');
+    <p class="muted">Resta segreta finché non la giochi. Se non la usi entro la fine, non ha effetto. ${behind===c?'L’avversario ha scelto la sua carta e la tiene coperta.':'L’avversario tiene una carta coperta.'}</p>`,'Inizia la seconda fase');
   G.stage='round';
 }
 function finish(){
@@ -949,10 +986,10 @@ function menu(){
      <li>Scegli il tuo Daniele preferito: il Metallaro insegue, il Nerd scappa. Il computer gioca la parte di Lucifero.</li>
      <li>La partita ha due fasi da tre round. In ogni round lanciate i dadi: 4 a testa, 5 per chi è indietro. Puoi rilanciare quanti dadi vuoi, ma una volta sola.</li>
      <li>Il Ladro assegna i suoi dadi: 1 ai punti Fuga, 1 o 2 alla Difesa e 1 all’Esposizione, che passa alla Polizia capovolto (il 6 diventa 1).</li>
-     <li>La Polizia assegna 1 dado all’Inseguimento e tanti dadi Sparatoria quanti sono i dadi Difesa. Può dichiarare una Raffica per avere un dado in più, ma perde 2 punti in quel round.</li>
+     <li>La Polizia assegna 1 dado all’Inseguimento e tanti dadi Sparatoria quanti sono i dadi Difesa. Può dichiarare una Raffica per avere un dado in più, ma perde 2 punti in quel round. Una volta per fase può anche usare il gettone ● per spostare di 1 un suo dado.</li>
      <li>Si confrontano Sparatoria e Difesa: chi ha il totale più basso perde la differenza dai suoi punti.</li>
-     <li>A metà partita c’è il confronto di fine fase: scegli in segreto Rapido, sicuro, o Disperato, che vale di più ma azzera tutto se esce un 1. Poi ognuno pesca una carta azione da giocare nella seconda fase; chi è indietro ne pesca due e ne tiene una.</li>
-     <li>Alla fine vince il Ladro se ha più punti Fuga dell’Inseguimento della Polizia. In parità vince la Polizia.</li>
+     <li>A metà partita c’è il confronto di fine fase: scegli in segreto Rapido, sicuro, o Disperato, che vale di più ma azzera tutto se esce un 1. Poi arrivano le carte azione per la seconda fase: chi è indietro sceglie la sua tra tutte, chi è avanti ne pesca una a caso.</li>
+     <li>Dopo il terzo round della seconda fase si passa subito al risultato: vince il Ladro se ha più punti Fuga dell’Inseguimento della Polizia. In parità vince la Polizia, che parte con 1 punto.</li>
      <li>Durante la partita lo schermo ti dice sempre cosa fare. Con “Calcoli: sì” vedi tutti i conti a fine round.</li></ol></details></section>
    <section class="panel"><details><summary>Promemoria regole</summary><ul>
      <li>Round 1: 4 dadi a testa. Round 2 e 3: chi è indietro lancia 5 dadi.</li>
@@ -961,9 +998,10 @@ function menu(){
      <li>Polizia: 1 Inseguimento e tanti dadi Sparatoria quanti i dadi Difesa. L’Esposizione va usata in uno dei due ruoli.</li>
      <li>Raffica: un dado Sparatoria in più, −2 all’Inseguimento del round.</li>
      <li>Sparatoria maggiore della Difesa: il Ladro perde la differenza. Difesa maggiore: la perde la Polizia. Mai sotto zero.</li>
-     <li>La Polizia parte con 2 punti Inseguimento. La partita si decide nei round: non c’è confronto finale.</li>
+     <li>La Polizia parte con 1 punto Inseguimento. La partita si decide nei sei round: non c’è confronto finale.</li>
+     <li>Gettone (solo Polizia, uno per fase): durante l’assegnazione sposta di 1, in su o in giù, il valore di un suo dado collocato, non l’Esposizione. In modalità Esperti serve solo ad alzare. Se non lo usa entro la fine della fase, lo perde.</li>
      <li>Confronto di fine fase (solo dopo la prima fase): Rapido (il più alto di 2 dadi) o Disperato (somma di 2, vale zero se esce un 1). Un rilancio di tutti i dadi.</li>
-     <li>Tra le due fasi tutti pescano una carta azione; chi è indietro ne pesca due e ne tiene una.</li></ul></details></section>
+     <li>Tra le due fasi: chi è indietro sceglie una carta azione tra tutte quelle del suo mazzo, chi è avanti ne pesca una a caso. In parità entrambi pescano a caso.</li></ul></details></section>
    <section style="display:flex;flex-direction:column;gap:10px"><h2 style="font-family:var(--label);font-size:24px">Dossier e traguardi</h2>
      <div class="dossiers">${doss}</div></section>
    <section class="panel"><span class="lbl">Reward sbloccati</span><div id="rewards" style="display:flex;flex-direction:column;gap:10px"></div></section>`;
