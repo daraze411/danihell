@@ -128,8 +128,8 @@ button{font:inherit;color:inherit}
 @keyframes tumble{0%{transform:rotate(-30deg) scale(.7);opacity:.2}100%{transform:none;opacity:1}}
 .die.new{animation:tumble .35s ease-out}
 @media (prefers-reduced-motion:reduce){.die,.die.new{animation:none;transition:none}}
-body.infernal .die:not(.d10){background:linear-gradient(145deg,#2a1214,#0b0607);border-color:#ff5b4d;box-shadow:0 2px 0 #7a1712}
-body.infernal .die:not(.d10) i{background:#ff5b4d}
+.infprev .die:not(.d10),body.infernal .die:not(.d10):not(.std){background:linear-gradient(145deg,#2a1214,#0b0607);border-color:#ff5b4d;box-shadow:0 2px 0 #7a1712}
+.infprev .die:not(.d10) i,body.infernal .die:not(.d10):not(.std) i{background:#ff5b4d}
 
 .zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .zone{border:2px dashed var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:104px;background:var(--surface2);cursor:pointer}
@@ -229,6 +229,28 @@ details summary{cursor:pointer;font-family:var(--label);font-weight:700;font-siz
 .party .ptext{display:flex;flex-direction:column;gap:6px;font-size:20px;line-height:1.45;max-width:36ch}
 .party .ptext p{margin:0}
 .party .sig{font-family:var(--display);font-size:28px;color:var(--luci);margin-top:6px}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.tab{appearance:none;border:0;background:transparent;color:var(--muted);font-family:var(--label);font-weight:700;font-size:15px;letter-spacing:.02em;padding:10px 4px;border-radius:10px;cursor:pointer;position:relative;min-height:44px}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.tab:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.tab .dot{position:absolute;top:7px;right:calc(50% - 30px);width:9px;height:9px;border-radius:50%;background:var(--luci);box-shadow:0 0 0 2px var(--surface)}
+.tabpanel{display:flex;flex-direction:column;gap:16px}
+.extra{display:flex;flex-direction:column;gap:12px}
+.xcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.xcard.locked{opacity:.62}
+.xhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.xhead b{font-family:var(--label);font-size:19px}
+.xstate{font-family:var(--label);font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.xstate.ok{color:var(--good)}
+.xcard p{margin:0;font-size:15px;color:var(--muted)}
+.choice{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.choice button{appearance:none;font:inherit;color:inherit;border:2px solid var(--line);background:var(--surface2);border-radius:12px;padding:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.choice button[aria-pressed="true"]{border-color:var(--accent);background:var(--surface)}
+.choice button:disabled{cursor:not-allowed}
+.choice .nm{font-family:var(--label);font-weight:700;font-size:15px}
+.choice .dice2{display:flex;gap:6px}
+.swatch{display:flex;gap:4px}.swatch i{width:22px;height:22px;border-radius:6px;border:1px solid rgba(0,0,0,.25);display:block}
+.lockmsg{font-size:14px;color:var(--muted)}
 .lossvid.win{border-color:var(--good)}
 .lossvid video{width:100%;height:100%;object-fit:cover;display:block}
 .lossvid .mini{position:absolute;right:max(10px,env(safe-area-inset-right,0px));bottom:10px;font-size:14px;padding:6px 12px}
@@ -992,6 +1014,30 @@ function posterSVG(){
 }
 
 /* ===================== Menu ===================== */
+let MENU_TAB='gioca';
+const unlockedCount=()=>DOSSIERS.filter((_,i)=>dossierDone(i)).length;
+function extraHTML(){
+  const lock=i=>`<span class="lockmsg">🔒 Chiudi il dossier “${esc(DOSSIERS[i].name)}” per sbloccarlo.</span>`;
+  const head=(name,ok)=>`<div class="xhead"><b>${name}</b><span class="xstate ${ok?'ok':''}">${ok?'Sbloccato':'Bloccato'}</span></div>`;
+  const d1=dossierDone(0),d2=dossierDone(1),d3=dossierDone(2),d4=dossierDone(3);
+  const dice=P.prefs.dice==='infernal'&&d2?'infernal':'std',theme=P.prefs.theme==='cozy'&&d3?'cozy':'base';
+  const prev=cls=>{const dc=cls?'static sm':'static sm std';return `<span class="dice2 ${cls}">${dieHTML({id:'a',v:6,side:'L'},dc)}${dieHTML({id:'b',v:3,side:'P'},dc)}</span>`};
+  return `<p class="muted" style="margin:0">Le ricompense dei dossier. Quelle sbloccate si attivano e si spengono da qui.</p>
+  <section class="xcard ${d1?'':'locked'}">${head('Modalità Esperti',d1)}
+    <p>Partita completa con riduzione dei dadi e valori distinti tra i ruoli.</p>
+    ${d1?`<div class="row"><button class="btn" id="goexpert">Scegli la modalità Esperti</button></div>`:lock(0)}</section>
+  <section class="xcard ${d2?'':'locked'}">${head('Dadi',d2)}
+    <div class="choice"><button data-dice="std" aria-pressed="${dice==='std'}">${prev('')}<span class="nm">Classici</span></button>
+      <button data-dice="infernal" aria-pressed="${dice==='infernal'}" ${d2?'':'disabled'}>${prev('infprev')}<span class="nm">Infernali</span></button></div>
+    ${d2?'':lock(1)}</section>
+  <section class="xcard ${d3?'':'locked'}">${head('Tema',d3)}
+    <div class="choice"><button data-theme-set="base" aria-pressed="${theme==='base'}"><span class="swatch"><i style="background:#130d0f"></i><i style="background:#ff5b4d"></i><i style="background:#f2b134"></i></span><span class="nm">Inferno</span></button>
+      <button data-theme-set="cozy" aria-pressed="${theme==='cozy'}" ${d3?'':'disabled'}><span class="swatch"><i style="background:#ead9c2"></i><i style="background:#a8321a"></i><i style="background:#b5562b"></i></span><span class="nm">Cozy</span></button></div>
+    ${d3?'':lock(2)}</section>
+  <section class="xcard ${d4?'':'locked'}">${head('Bonus track: la setlist',d4)}
+    <p>La tracklist del primo album Brutal Cozy Metal.</p>
+    ${d4?`<div class="row"><button class="btn" id="films">Apri la setlist</button></div>`:lock(3)}</section>`;
+}
 function menu(){
   applyPrefs();
   const expertOK=dossierDone(0);
@@ -1002,16 +1048,25 @@ function menu(){
        <div class="t"><b>${esc(it[0])}</b><span>${esc(it[1])}</span>${t>1?`<div class="bar"><i style="width:${Math.min(100,c/t*100)}%"></i></div>`:''}</div>
        <span class="lbl num">${Math.min(c,t)}/${t}</span></div>`}).join('')}
      <div class="reward"><span class="lbl">Reward</span> · ${esc(d.reward)} ${ok?'· <b style="color:var(--good)">sbloccato</b>':''}</div></article>`}).join('');
+  const newRw=unlockedCount()>(P.seenRw||0);
   app.innerHTML=`
    <div class="marin" aria-hidden="true"></div>
    <header class="hero withposter">${posterSVG()}<h1 class="sr">DANIHELL</h1>
      <div class="htext"><span class="credit">Gioco per due · tu contro la CPU</span>
      <p class="tagline">Il gioco ufficiale dei 40 anni di Daniele. Scegli il tuo personaggio: uno insegue Lucifero, l’altro scappa da lui.</p>
      <p class="muted" style="margin:0">Partite giocate: <b class="num">${P.games}</b> · vittorie: <b class="num">${P.wins}</b> · serie attuale: <b class="num">${P.streak}</b></p></div></header>
+   <nav class="tabs" role="tablist" aria-label="Sezioni">
+     <button class="tab" role="tab" id="tab-gioca" data-tab="gioca" aria-controls="pane-gioca">Gioca</button>
+     <button class="tab" role="tab" id="tab-regole" data-tab="regole" aria-controls="pane-regole">Regole</button>
+     <button class="tab" role="tab" id="tab-dossier" data-tab="dossier" aria-controls="pane-dossier">Dossier</button>
+     <button class="tab" role="tab" id="tab-extra" data-tab="extra" aria-controls="pane-extra">Extra${newRw?'<span class="dot" aria-label="Novità"></span>':''}</button></nav>
+   <div class="tabpanel" role="tabpanel" id="pane-gioca" aria-labelledby="tab-gioca">
    ${Date.now()<=PARTY.until?`<section class="panel partybox"><span class="lbl">Eri alla festa?</span>
      <p style="margin:0">C’è un messaggio per te. Indizio per la password: <b>${PARTY.hint}</b>. Disponibile fino alle 23:59 di oggi.</p>
      <form class="row" id="pform" autocomplete="off"><input id="pw" class="pw" type="text" inputmode="text" autocapitalize="off" spellcheck="false" placeholder="Password" aria-label="Password">
        <button class="btn primary" id="pgo" type="submit">Entra</button></form><span class="err" id="perr" role="status"></span></section>`:''}
+   <section class="panel resume" id="resume" hidden><span class="lbl">Partita interrotta</span><p style="margin:0"></p>
+     <div class="row"><button class="btn primary" id="res-go">Riprendi la partita</button><button class="btn" id="res-no">Scartala</button></div></section>
    <section class="panel">
      <span class="lbl">Scegli il tuo Daniele preferito</span>
      <div class="seg" id="roles">
@@ -1021,12 +1076,12 @@ function menu(){
      <div class="seg" id="modes">
        <button class="opt" data-m="full"><b>Partita completa</b><small>Due fasi, carte azione, un confronto a metà partita.</small></button>
        <button class="opt" data-m="travel"><b>Partita lampo</b><small>Una fase da tre round. Niente carte, niente confronti.</small></button>
-       <button class="opt" data-m="expert" ${expertOK?'':'disabled'}><b>Esperti</b><small>${expertOK?'Partita completa con riduzione dei dadi e valori distinti tra i ruoli.':'Si sblocca chiudendo il Dossier 1.'}</small></button></div>
+       <button class="opt" data-m="expert" ${expertOK?'':'disabled'}><b>Esperti</b><small>${expertOK?'Partita completa con riduzione dei dadi e valori distinti tra i ruoli.':`Si sblocca chiudendo il dossier “${esc(DOSSIERS[0].name)}”.`}</small></button></div>
      <div class="row"><button class="btn primary" id="start">Inizia la partita</button>${calcBtn()}<span class="muted" style="font-size:14px">Mostra il dettaglio dei calcoli a fine round e nei confronti.</span></div>
    </section>
-   <section class="panel resume" id="resume" hidden><span class="lbl">Partita interrotta</span><p style="margin:0"></p>
-     <div class="row"><button class="btn primary" id="res-go">Riprendi la partita</button><button class="btn" id="res-no">Scartala</button></div></section>
-   <section class="panel"><details ${P.games===0?'open':''}><summary>Come si gioca</summary><ol class="howto">
+   </div>
+   <div class="tabpanel" role="tabpanel" id="pane-regole" aria-labelledby="tab-regole" hidden>
+   <section class="panel"><details open><summary>Come si gioca</summary><ol class="howto">
      <li>Scegli il tuo Daniele preferito: il Metallaro insegue, il Nerd scappa. Il computer gioca la parte di Lucifero.</li>
      <li>La partita ha due fasi da tre round. In ogni round lanciate i dadi: 4 a testa, 5 per chi è indietro. Puoi rilanciare quanti dadi vuoi, ma una volta sola.</li>
      <li>Il Ladro assegna i suoi dadi: 1 ai punti Fuga, 1 o 2 alla Difesa e 1 all’Esposizione, che passa alla Polizia capovolto (il 6 diventa 1).</li>
@@ -1046,9 +1101,11 @@ function menu(){
      <li>Gettone (solo Polizia, uno per fase): durante l’assegnazione sposta di 1, in su o in giù, il valore di un suo dado collocato, non l’Esposizione. In modalità Esperti serve solo ad alzare. Se non lo usa entro la fine della fase, lo perde.</li>
      <li>Confronto di fine fase (solo dopo la prima fase): Rapido (il più alto di 2 dadi) o Disperato (somma di 2, vale zero se esce un 1). Un rilancio di tutti i dadi.</li>
      <li>Tra le due fasi: chi è indietro sceglie una carta azione tra tutte quelle del suo mazzo, chi è avanti ne pesca una a caso. In parità entrambi pescano a caso.</li></ul></details></section>
-   <section style="display:flex;flex-direction:column;gap:10px"><h2 style="font-family:var(--label);font-size:24px">Dossier e traguardi</h2>
-     <div class="dossiers">${doss}</div></section>
-   <section class="panel"><span class="lbl">Reward sbloccati</span><div id="rewards" style="display:flex;flex-direction:column;gap:10px"></div></section>`;
+   </div>
+   <div class="tabpanel" role="tabpanel" id="pane-dossier" aria-labelledby="tab-dossier" hidden>
+     <p class="muted" style="margin:0">Completa i cinque traguardi di un dossier per chiuderlo e sbloccare il suo reward, che trovi nella scheda Extra.</p>
+     <div class="dossiers">${doss}</div></div>
+   <div class="tabpanel extra" role="tabpanel" id="pane-extra" aria-labelledby="tab-extra" hidden>${extraHTML()}</div>`;
   const sync=()=>{app.querySelectorAll('[data-r]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===role));
     app.querySelectorAll('[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode))};
   app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{if(role===b.dataset.r)return;P.last.role=b.dataset.r;P.last.mode=mode;save();const y=window.scrollY;menu();window.scrollTo(0,y);const nb=app.querySelector(`[data-r="${b.dataset.r}"]`);if(nb)nb.focus({preventScroll:true})});
@@ -1066,15 +1123,18 @@ function menu(){
     rs.hidden=false;rs.querySelector('p').textContent=`${h==='P'?'Dani il Metallaro':'Dani il Nerd'} · fase ${sv.G.phase}, round ${sv.G.round} · ${v.Fuga} ${sv.G.F}, ${v.Inseguimento} ${sv.G.I}`;
     rs.querySelector('#res-go').onclick=()=>playGame(sv.cfg,sv);
     rs.querySelector('#res-no').onclick=()=>{clearSave();rs.hidden=true}}
-  const rw=app.querySelector('#rewards');const parts=[];
-  parts.push(dossierDone(0)?'<div><b>Modalità Esperti</b> · disponibile tra le modalità.</div>':'<div class="muted">Modalità Esperti · chiudi il Dossier 1.</div>');
-  parts.push(dossierDone(1)?`<div class="row"><b>Dadi infernali</b><button class="btn" id="dice">${P.prefs.dice==='infernal'?'Usa i dadi classici':'Usa i dadi infernali'}</button></div>`:'<div class="muted">Dadi infernali · chiudi il Dossier 2.</div>');
-  parts.push(dossierDone(2)?`<div class="row"><b>Tema Cozy</b><button class="btn" id="theme">${P.prefs.theme==='cozy'?'Torna al tema base':'Attiva il tema Cozy'}</button></div>`:'<div class="muted">Tema Cozy · chiudi il Dossier 3.</div>');
-  parts.push(dossierDone(3)?'<div class="row"><b>Bonus track</b><button class="btn" id="films">Apri la setlist</button></div>':'<div class="muted">Bonus track: la setlist · chiudi il Dossier 4.</div>');
-  rw.innerHTML=parts.join('');
-  const f=rw.querySelector('#films');if(f)f.onclick=films;
-  const d=rw.querySelector('#dice');if(d)d.onclick=()=>{P.prefs.dice=P.prefs.dice==='infernal'?'std':'infernal';save();menu()};
-  const t=rw.querySelector('#theme');if(t)t.onclick=()=>{P.prefs.theme=P.prefs.theme==='cozy'?'base':'cozy';save();menu()};
+  const showTab=t=>{MENU_TAB=t;app.querySelectorAll('[data-tab]').forEach(b=>{const on=b.dataset.tab===t;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1});
+    ['gioca','regole','dossier','extra'].forEach(k=>app.querySelector('#pane-'+k).hidden=k!==t);
+    if(t==='extra'&&unlockedCount()>(P.seenRw||0)){P.seenRw=unlockedCount();save();const dt=app.querySelector('.tab .dot');if(dt)dt.remove()}};
+  app.querySelectorAll('[data-tab]').forEach(b=>{b.onclick=()=>showTab(b.dataset.tab);
+    b.onkeydown=e=>{const ks=['gioca','regole','dossier','extra'];let i=ks.indexOf(b.dataset.tab);
+      if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();i=(i+(e.key==='ArrowRight'?1:3))%4;showTab(ks[i]);app.querySelector('#tab-'+ks[i]).focus()}}});
+  showTab(MENU_TAB);
+  const ex=app.querySelector('#pane-extra');
+  ex.querySelectorAll('[data-dice]').forEach(b=>b.onclick=()=>{P.prefs.dice=b.dataset.dice;save();menu()});
+  ex.querySelectorAll('[data-theme-set]').forEach(b=>b.onclick=()=>{P.prefs.theme=b.dataset.themeSet;save();menu()});
+  const fl=ex.querySelector('#films');if(fl)fl.onclick=films;
+  const gx=ex.querySelector('#goexpert');if(gx)gx.onclick=()=>{P.last.mode='expert';save();MENU_TAB='gioca';menu()};
   window.scrollTo(0,0);
 }
 
