@@ -92,6 +92,7 @@ button{font:inherit;color:inherit}
 .side .lbl{font-size:11px;letter-spacing:.04em;overflow-wrap:anywhere;hyphens:auto;line-height:1.2}
 .mid b{text-wrap:balance;line-height:1.15}
 .tokdot{white-space:nowrap}
+.raffc{display:block;letter-spacing:.04em}
 @media (max-width:420px){.mid b{font-size:15px}.side{padding:8px 10px}.side .score{font-size:40px}.side .who{font-size:12px}}
 .side{border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:0;min-width:0}
 .side.L{background:var(--thief-soft)} .side.P{background:var(--police-soft);text-align:right}
@@ -390,6 +391,7 @@ function buildRules(){
   if(MODE==='L')masc('Raffica','Guscio blu');
   if(MODE==='P')masc('Sparatoria','Megariff');
   R.push([/\bper prima\b/g,'per primo']);
+  R.push([/\bRaffiche\b/g,MODE==='L'?'Gusci blu':MODE==='P'?'Doppie casse':'Raffiche']);
   for(const [k,w] of Object.entries(t))R.push([new RegExp('\\b'+k+'\\b','g'),w]);
   RULES=R;
 }
@@ -494,7 +496,7 @@ function renderBoard(){
      <span class="who">Ladro · ${isHuman('L')?'tu':'CPU'}</span><div class="held">${held('L')}</div></div>
    <div class="mid"><b>${rd}</b><span class="lbl">${ph}${G.expert?' · Esperti':''}</span>${calcBtn()}</div>
    <div class="side P"><span class="lbl">Inseguimento</span><span class="score num">${G.I}</span>
-     <span class="who">Polizia · ${isHuman('P')?'tu':'CPU'}</span><span class="tokdot ${G.tok?'on':''}" title="${G.tok?'Gettone disponibile':'Gettone già usato o non disponibile'}">${G.tok?'●':'○'} gettone</span><div class="held" style="justify-content:flex-end">${held('P')}</div></div>`;
+     <span class="who">Polizia · ${isHuman('P')?'tu':'CPU'}</span><span class="tokdot ${G.tok?'on':''}" title="${G.tok?'Gettone disponibile':'Gettone già usato o non disponibile'}">${G.tok?'●':'○'} gettone</span><span class="tokdot on raffc" title="Quante ne restano in questa fase">Raffica ${"■".repeat(raffLeft())}${"□".repeat(RAFF_MAX-raffLeft())}</span><div class="held" style="justify-content:flex-end">${held('P')}</div></div>`;
 }
 function calcBtn(){const on=P.prefs.calc!==false;return `<button class="calctog" data-calc aria-pressed="${on}">Calcoli: ${on?'sì':'no'}</button>`}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-calc]');if(!b)return;
@@ -645,8 +647,8 @@ function cpuTok(a,R,zones,validate,basista){
   const up=d=>!d.expo&&d.v<(d.sides||6);
   let where=null;
   if(!basista){const spar=sum(a.spar.map(d=>d.v))+(R.supBonus||0),gap=R.defTot-spar;
-    if(gap===0||gap===1){const c=a.spar.filter(up).sort((x,y)=>x.v-y.v)[0];if(c)where=['spar',c.id]}}
-  if(!where&&G.round===3){const i=a.ins[0];if(up(i))where=['ins',i.id];else{const c=a.spar.filter(up)[0];if(c)where=['spar',c.id]}}
+    if(gap===0||(gap===1&&CPU_CFG.police!=='soft')){const c=a.spar.filter(up).sort((x,y)=>x.v-y.v)[0];if(c)where=['spar',c.id]}}
+  if(!where&&G.round===3&&CPU_CFG.police!=='soft'){const i=a.ins[0];if(up(i))where=['ins',i.id];else{const c=a.spar.filter(up)[0];if(c)where=['spar',c.id]}}
   if(!where)return a;
   const b={};zones.forEach(z=>b[z.key]=a[z.key].map(d=>({...d})));
   const t=b[where[0]].find(d=>d.id===where[1]),from=t.v;t.v=from+1;t.tok=true;
@@ -687,12 +689,42 @@ function bestOf(cands,score,validate,order){
 }
 function prepRelax(dice,zones,val){G.relax=false;if(!bestOf(enumerate(dice,zones),()=>0,val,zones.map(z=>z.key)))G.relax=true;
   if(G.relax)log('Nessuna assegnazione rispetta i vincoli con questi dadi: per questo round i vincoli sono sospesi.','S')}
+/* CPU: stima di cosa farà la Polizia (Monte Carlo con campioni comuni per round) */
+const CPU_CFG={thief:'old',police:'soft'};
+function mcSamples(n,noRe){const key=n+(noRe?'n':'r');G._mc=G._mc||{};if(G._mc.key===key+G.phase+'-'+G.round)return G._mc.s;
+  const r6=()=>1+Math.floor(Math.random()*6),out=[];
+  for(let i=0;i<240;i++){let v=Array.from({length:n},r6);if(!noRe)v=v.map(x=>x<=3?r6():x);out.push(v)}
+  G._mc={key:key+G.phase+'-'+G.round,s:out};return out}
+function policeV(vals,k,pen,def,f,mult){
+  // vals ordinati dal più alto: la Polizia sceglie se tenere il dado migliore per l'attacco o per i punti
+  const sc=(ins,spar)=>{ins=Math.max(0,ins-pen);return ins+(spar>def?Math.min(G.F+f,spar-def):-Math.min(G.I+ins,(def-spar)*mult))};
+  let sA=0;for(let i=0;i<k;i++)sA+=vals[i]||0;const a=sc(vals[k]||0,sA);
+  let sB=0;for(let i=1;i<=k;i++)sB+=vals[i]||0;const b=sc(vals[0]||0,sB);
+  return Math.max(a,b)}
+function policeExpect(nDif,def,expoV,f,R){
+  const S=mcSamples(R.nP,R.sabot),mult=R.regalo?2:1,pen=R.fuoco?0:2;let e0=0,e1=0;
+  for(const smp of S){const vals=[...smp,expoV].sort((x,y)=>y-x);e0+=policeV(vals,nDif,0,def,f,mult);if(!R.regalo)e1+=policeV(vals,nDif+1,pen,def,f,mult)}
+  e0/=S.length;e1/=S.length;return{e0,e1:R.regalo?-1e9:e1}}
+const RAFF_MAX=2;
+const raffLeft=()=>G.raffLeft===undefined?RAFF_MAX:G.raffLeft;
+function spendRaffica(R){if(R.raffica&&!R.fuoco){G.raffLeft=Math.max(0,raffLeft()-1)}}
+function cpuRaffica(R,expoV){
+  if(R.fuoco)return true;
+  if(raffLeft()<=0)return false;
+  if(CPU_CFG.police==='old')return R.defTot/R.tA.dif.length>=5&&Math.random()<.7;
+  const pe=policeExpect(R.tA.dif.length,R.defTot,expoV,R.fugaGain,R);
+  if(CPU_CFG.police==='smart')return pe.e1>pe.e0;
+  // morbida: solo quando la Raffica serve davvero, e non sempre
+  return pe.e1>pe.e0+1.5&&Math.random()<.6}
 function cpuThief(dice,R){
   const zones=thiefZones(R),val=thiefValidate(R,zones);prepRelax(dice,zones,val);
   const score=a=>{
     const f=R.regalo?0:sum(a.fuga.map(d=>d.v));let def=sum(a.dif.map(d=>d.v));if(R.posto)def=Math.min(def,3);
     if(R.basista){const sp=R.pA.sparTot;let s=f;if(sp>def)s-=Math.min(G.F+f,sp-def);else s+=Math.min(G.I,(def-sp)*(R.regalo?2:1));return s}
-    const e=a.expo[0].v;return f+.85*(def-4.6*a.dif.length)+.35*e-(R.posto&&a.dif.length===2?1:0);
+    const e=a.expo[0].v;
+    if(CPU_CFG.thief==='old')return f+.85*(def-4.6*a.dif.length)+.35*e-(R.posto&&a.dif.length===2?1:0);
+    // tiene conto di quanto può fare la Polizia, Raffica compresa
+    const pe=policeExpect(a.dif.length,def,7-e,f,R);return f-Math.max(pe.e0,pe.e1);
   };
   return bestOf(enumerate(dice,zones),score,val,zones.map(z=>z.key));
 }
@@ -792,8 +824,12 @@ async function normalRound(R){
      <div class="row"><span>Esposizione ${R.tA.expo[0].v} → per te</span>${diceRow([expoV],'L')}${R.tiratore?'<span class="muted">(Tiratore scelto: non capovolto)</span>':''}</div></div>`;
   // Raffica
   if(R.regalo)R.raffica=false;
-  else if(isHuman('P'))R.raffica=await choose(`<h2 class="who-P">Dichiari una Raffica?</h2>${thiefBox}<p>La Raffica aggiunge un dado alla Sparatoria (${R.tA.dif.length+1} invece di ${R.tA.dif.length})${R.fuoco?'. Con Fuoco di copertura non perdi punti Inseguimento.':' ma riduce di 2 l’Inseguimento del round.'}</p>`,[[false,'Niente Raffica'],[true,'Dichiara Raffica']]);
-  else R.raffica=R.fuoco||(R.defTot/R.tA.dif.length>=5&&Math.random()<.7);
+  else if(isHuman('P')){
+    if(!R.fuoco&&raffLeft()<=0){R.raffica=false;await pause(`<h2 class="who-P">Niente Raffica</h2>${thiefBox}<p>Raffiche disponibili in questa fase: 0 su ${RAFF_MAX}. Nella prossima fase si riparte da ${RAFF_MAX}.</p>`,'Lancia i dadi')}
+    else R.raffica=await choose(`<h2 class="who-P">Dichiari una Raffica?</h2>${thiefBox}<p>La Raffica aggiunge un dado alla Sparatoria (${R.tA.dif.length+1} invece di ${R.tA.dif.length})${R.fuoco?'. Con Fuoco di copertura non perdi punti Inseguimento e non la consumi.':` ma riduce di 2 l’Inseguimento del round. Te ne restano <b>${raffLeft()}</b> su ${RAFF_MAX} in questa fase.`}</p>`,[[false,'Niente Raffica'],[true,'Dichiara Raffica']]);
+  }
+  else R.raffica=cpuRaffica(R,expoV);
+  spendRaffica(R);
   if(R.raffica)log(`Polizia dichiara una Raffica${R.fuoco?' (Fuoco di copertura)':''}.`,'P');
   const need=R.tA.dif.length+(R.raffica?1:0);
   const ex={id:'x',v:expoV,sides:6,side:'L',expo:true};
@@ -812,8 +848,10 @@ async function normalRound(R){
 }
 async function basistaRound(R){
   // La Polizia agisce per prima
-  if(isHuman('P'))R.raffica=await choose(`<h2 class="who-P">Basista informato: agisci per prima</h2><p>Assegnerai 1 Inseguimento e 2 Sparatoria, oppure 3 con la Raffica (−2 all’Inseguimento).</p>`,[[false,'Niente Raffica'],[true,'Dichiara Raffica']]);
-  else R.raffica=Math.random()<.35;
+  if(isHuman('P'))R.raffica=raffLeft()>0?await choose(`<h2 class="who-P">Basista informato: agisci per prima</h2><p>Assegnerai 1 Inseguimento e 2 Sparatoria, oppure 3 con la Raffica (−2 all’Inseguimento). Raffiche disponibili in questa fase: <b>${raffLeft()}</b> su ${RAFF_MAX}.</p>`,[[false,'Niente Raffica'],[true,'Dichiara Raffica']])
+    :(await pause(`<h2 class="who-P">Basista informato: agisci per prima</h2><p>Assegnerai 1 Inseguimento e 2 Sparatoria. Raffiche finite per questa fase.</p>`),false);
+  else R.raffica=raffLeft()>0&&Math.random()<.35;
+  spendRaffica(R);
   const need=2+(R.raffica?1:0);
   const pD=isHuman('P')?await humanRoll('P',R.nP,{}):cpuRoll('P',R.nP,{});
   if(G.abort)return;
@@ -995,7 +1033,7 @@ async function playGame(cfg,saved){
   for(let ph=1;ph<=phases;ph++){
     if(ph===2){if(k>=from){G.phase=ph;cp();await drawCards();if(G.abort)return}k++}
     for(let r=1;r<=3;r++){if(k>=from){G.phase=ph;G.round=r;G.stage='round';cp();
-      if(r===1){G.tok=true;log(`La Polizia riceve il gettone della fase ${ph} ●.`,'P')}
+      if(r===1){G.tok=true;G.raffLeft=RAFF_MAX;log(`La Polizia riceve il gettone della fase ${ph} ●.`,'P')}
       await playRound();if(G.abort)return;
       if(r===3&&ph<phases&&G.tok){G.tok=false;log('Il gettone della Polizia non è stato usato in questa fase: va perso.','P')}}k++}
     if(ph<phases){if(k>=from){G.phase=ph;cp();await confronto(false);if(G.abort)return}k++}
@@ -1125,7 +1163,7 @@ const TUT=[
   p:'Ogni round lanciate 4 dadi a testa, 5 per chi è indietro. Puoi rilanciarne quanti vuoi, ma una volta sola.'},
  {t:'Il Ladro piazza i dadi',v:()=>`<div class="tzones">${tzone('Fuga',d6(5,'L'),'+5','L')}${tzone('Difesa',d6(4,'L')+d6(3,'L'),'7','L')}${tzone('Esposizione',d6(6,'L',{expo:true})+'<span class="tarrow">→</span>'+d6(1,'P'),'','L')}</div>`,
   p:'Un dado va in Fuga: sono punti. Uno o due in Difesa. L’ultimo va in Esposizione e passa alla Polizia capovolto: il 6 diventa 1. Conviene metterci un dado alto.'},
- {t:'La Polizia risponde',v:()=>`<div class="tzones">${tzone('Inseguimento',d6(1,'P'),'+1','P')}${tzone('Sparatoria',d6(6,'P')+d6(5,'P'),'11','P')}</div><div class="tchips"><span>Raffica: +1 dado, −2 punti</span><span>● Gettone: +1 o −1 a un dado</span></div>`,
+ {t:'La Polizia risponde',v:()=>`<div class="tzones">${tzone('Inseguimento',d6(1,'P'),'+1','P')}${tzone('Sparatoria',d6(6,'P')+d6(5,'P'),'11','P')}</div><div class="tchips"><span>Raffica: +1 dado, −2 punti, max 2 per fase</span><span>● Gettone: +1 o −1 a un dado</span></div>`,
   p:'La Polizia mette 1 dado in Inseguimento e tanti dadi in Sparatoria quanti sono quelli in Difesa. Può usare anche il dado ricevuto.'},
  {t:'Lo scontro',v:()=>`<div class="tclash"><div><span>Sparatoria</span><b class="num">11</b></div><span class="tvs">contro</span><div><span>Difesa</span><b class="num">7</b></div></div><p class="tres">Il Ladro perde 11 − 7 = <b>4</b> punti Fuga</p>`,
   p:'Si confrontano le somme. Chi ha il totale più basso perde la differenza dai suoi punti. Con “Calcoli: sì” vedi tutti i conti a fine round.'},
@@ -1223,7 +1261,7 @@ function menu(){
      <dt>Lancio</dt><dd>4 dadi a testa; dal secondo round chi è indietro ne lancia 5. Un solo rilancio, di quanti dadi vuoi.</dd>
      <dt>Il Ladro</dt><dd>1 dado in Fuga, 1 o 2 in Difesa, 1 in Esposizione: passa alla Polizia capovolto (1↔6, 2↔5, 3↔4).</dd>
      <dt>La Polizia</dt><dd>1 dado in Inseguimento e tanti in Sparatoria quanti i dadi in Difesa.</dd>
-     <dt>Raffica</dt><dd>Un dado in più in Sparatoria, ma −2 punti in quel round.</dd>
+     <dt>Raffica</dt><dd>Un dado in più in Sparatoria, ma −2 punti in quel round. Al massimo 2 per fase.</dd>
      <dt>Gettone ●</dt><dd>Solo la Polizia, uno per fase: +1 o −1 a un suo dado. Se non lo usa, lo perde.</dd>
      <dt>Scontro</dt><dd>Sparatoria contro Difesa: chi ha meno perde la differenza. Mai sotto zero.</dd>
      <dt>Metà partita</dt><dd>Confronto: Rapido (il più alto di 2 dadi) o Disperato (somma di 2, zero se esce un 1). Poi le carte: chi è indietro ne pesca due e ne tiene una, chi è avanti ne pesca una a caso. Ogni carta si usa una volta.</dd>

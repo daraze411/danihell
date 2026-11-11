@@ -18,7 +18,7 @@ Le regole sono le stesse per entrambi i personaggi, ma ognuno ha i suoi nomi per
 | **Lancio** | 4 dadi a testa; dal secondo round chi è indietro ne lancia 5. Un solo rilancio. |
 | **Chi scappa** | 1 dado ai punti, 1 o 2 in difesa, 1 che passa all'avversario capovolto (1↔6, 2↔5, 3↔4). |
 | **Chi insegue** | 1 dado ai punti e tanti dadi d'attacco quanti i dadi in difesa. |
-| **Dado extra** | Chi insegue può prendere un dado d'attacco in più, ma perde 2 punti in quel round. |
+| **Dado extra** | Chi insegue può prendere un dado d'attacco in più, ma perde 2 punti in quel round. Al massimo 2 volte per fase. |
 | **Gettone ●** | Solo chi insegue, uno per fase: +1 o −1 a un suo dado. Se non lo usa, lo perde. |
 | **Scontro** | Attacco contro difesa: chi ha meno perde la differenza. Mai sotto zero. |
 | **Metà partita** | Confronto: mossa sicura (il più alto di 2 dadi) o rischiosa (somma di 2, zero se esce un 1). Poi le carte: chi è indietro ne pesca due e ne tiene una, chi è avanti ne pesca una a caso. |
