@@ -152,13 +152,6 @@ button{font:inherit;color:inherit}
 .card h3{font-family:var(--label);font-size:21px}
 .card.L h3{color:var(--thief)} .card.P h3{color:var(--police)}
 .card p{margin:0;font-size:15px}
-.card .cbrief{font-size:17px;font-weight:600;line-height:1.35}
-.ctut{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;counter-reset:ct}
-.ctut li{counter-increment:ct;display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:8px;font-size:15px;line-height:1.4}
-.ctut li::before{content:counter(ct);grid-row:span 2;width:22px;height:22px;border-radius:50%;background:var(--surface);border:1.5px solid currentColor;display:grid;place-items:center;font-family:var(--label);font-weight:700;font-size:12px;color:var(--muted)}
-.ctut li span{font-family:var(--label);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.cexact summary{font-size:13px;font-weight:600;color:var(--muted)}
-.cexact p{margin-top:4px;font-size:14px}
 .pick2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px}
 .pickc{display:flex;flex-direction:column;gap:8px}
 .pickc .card{flex:1}
@@ -516,13 +509,7 @@ function ui(html,bind){return new Promise(res=>{const st=document.getElementById
 function pause(html,label='Continua'){return ui(html+`<div class="row"><button class="btn primary" id="ok">${label}</button></div>`,(st,res)=>{const b=st.querySelector('#ok');b.focus({preventScroll:true});b.onclick=()=>res()})}
 function choose(html,opts){return ui(html+`<div class="row">${opts.map((o,i)=>`<button class="btn ${i===0?'primary':''}" data-i="${i}">${o[1]}</button>`).join('')}</div>`,
   (st,res)=>st.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>res(opts[+b.dataset.i][0])))}
-const CARD_TIPS={posto:{b:'Blocchi la Difesa del Ladro: in questo round non può superare 3.',k:'Quando il Ladro ha appena difeso bene e vuoi che la tua Sparatoria passi.',u:'A inizio round il gioco ti chiede se vuoi giocarla: tocca «Gioca la carta». Il Ladro dovrà tenere la Difesa a 3 o meno.'},rinforzi:{b:'Lanci un dado in più in questo round.',k:'Quando il Ladro ha messo dadi alti: più dadi significa più scelta.',u:'Dopo che il Ladro ha piazzato i dadi, tocca «Gioca la carta»: il dado in più arriva nel tuo lancio.'},tiratore:{b:'Il dado Esposizione ti arriva com’è, senza essere capovolto.',k:'Quando il Ladro mette un 5 o un 6 in Esposizione: per te resta alto.',u:'Guarda il dado Esposizione del Ladro: se è alto, tocca «Gioca la carta» prima di lanciare.'},supporto:{b:'La Sparatoria prende un bonus: metà del dado Fuga del Ladro.',k:'Quando il Ladro ha messo un dado alto in Fuga.',u:'Tocca «Gioca la carta» dopo le assegnazioni del Ladro: il bonus si aggiunge da solo ai calcoli.'},motore:{b:'Un tuo dado diventa da dieci facce: può arrivare a 10.',k:'Quando ti serve un colpo grosso per superare la Difesa.',u:'Tocca «Gioca la carta» prima di lanciare: uno dei tuoi dadi sarà da 10.'},fuoco:{b:'Puoi dichiarare una Raffica senza perdere i 2 punti.',k:'Quando il Ladro ha 2 dadi in Difesa e ti serve un dado in più per superarla.',u:'Tocca «Gioca la carta», poi quando assegni i dadi dichiara la Raffica: questa volta è gratis.'},rifugio:{b:'Dopo aver perso punti Fuga in un round, ne recuperi fino a 3.',k:'Tienila per il round che va male: è un’assicurazione.',u:'Subito dopo una perdita il gioco te la propone: tocca «Gioca la carta» e i punti tornano.'},moto:{b:'Metti due dadi in Fuga invece di uno, e uno solo in Difesa.',k:'All’inizio della fase, quando vuoi fare tanti punti subito.',u:'Al round 1 o 2 tocca «Gioca la carta»: poi metti due dadi diversi in Fuga, uno in Difesa e uno in Esposizione.'},basista:{b:'La Polizia piazza i dadi per prima e tu rispondi sapendo già tutto.',k:'In un round decisivo, quando vuoi difenderti con precisione.',u:'A inizio round tocca «Gioca la carta»: vedrai le scelte della Polizia prima di assegnare i tuoi dadi.'},falsa:{b:'Un tuo dado sale di 3, senza superare 6.',k:'Quando ti esce un dado basso che ti rovina il lancio.',u:'Dopo il lancio tocca il dado da aumentare: un 2 diventa 5, un 4 diventa 6.'},sabot:{b:'In questo round la Polizia non può rilanciare.',k:'Quando vuoi che la Polizia si tenga i dadi che le escono.',u:'A inizio round, prima del tuo lancio, tocca «Gioca la carta».'},regalo:{b:'Una scommessa: rinunci ai punti Fuga, ma se la Difesa tiene la Polizia perde il doppio.',k:'Quando sei indietro e pensi di poter difendere bene.',u:'A inizio round tocca «Gioca la carta», poi punta tutto sulla Difesa. Puoi rilanciare un solo dado.'}};
-const cardHTML=(id,side,mode='')=>{const c=cardById(id),t=CARD_TIPS[id]||{};
-  const third=mode==='use'?['Come si usa',t.u]:['Conviene',t.k];
-  return `<div class="card ${side}"><span class="lbl">Carta ${NAME[side]}</span><h3>${esc(c.n)}</h3>
-    <p class="cbrief">${esc(t.b||c.e)}</p>
-    <ol class="ctut"><li><span>Quando</span>${esc(c.q)}</li>${mode?`<li><span>${third[0]}</span>${esc(third[1]||'')}</li>`:''}</ol>
-    <details class="cexact"><summary>Regola esatta</summary><p>${esc(c.e)}</p></details></div>`};
+const cardHTML=(id,side)=>{const c=cardById(id);return `<div class="card ${side}"><span class="lbl">Carta ${NAME[side]}</span><h3>${esc(c.n)}</h3><p><b>Quando:</b> ${esc(c.q)}</p><p><b>Effetto:</b> ${esc(c.e)}</p></div>`};
 
 /* ===================== Lancio ===================== */
 async function humanRoll(side,n,{maxRe=99,noRe=false,d10=false,extra=[],info=''}={}){
@@ -721,7 +708,7 @@ function useCard(s){G.used[s]=true;const c=cardById(G.cards[s]);log(`${NAME[s]} 
   if(isHuman(s)){G.t.usedCard=true}}
 const lastRound=()=>G.phase===2&&G.round===3;
 async function askCard(s,extra=''){
-  return (await choose(`<h2>Vuoi giocare la tua carta?</h2>${extra}${cardHTML(G.cards[s],s,'use')}`,[[true,'Gioca la carta'],[false,'Non ora']]));
+  return (await choose(`<h2>Vuoi giocare la tua carta?</h2>${extra}${cardHTML(G.cards[s],s)}`,[[true,'Gioca la carta'],[false,'Non ora']]));
 }
 async function startWindow(R){
   // Polizia: Posto di blocco · Ladro: Moto veloce, Sabotaggio, Regalo esplosivo, Basista informato
@@ -770,7 +757,7 @@ async function falsaPista(tD){
   if(!hasCard('L','falsa'))return;
   let i=-1;
   if(isHuman('L')){
-    i=await ui(`<h2 class="who-L">Vuoi giocare Falsa pista?</h2><div class="tray">${tD.map(d=>dieHTML(d,'static')).join('')}</div>${cardHTML('falsa','L','use')}
+    i=await ui(`<h2 class="who-L">Vuoi giocare Falsa pista?</h2><div class="tray">${tD.map(d=>dieHTML(d,'static')).join('')}</div>${cardHTML('falsa','L')}
       <div class="row">${tD.map((d,k)=>d.v<6?`<button class="btn" data-i="${k}">${d.v} → ${Math.min(6,d.v+3)}</button>`:'').join('')}<button class="btn" data-i="-1">Non ora</button></div>`,
       (st,res)=>st.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>res(+b.dataset.i)));
   }else{const low=[...tD].sort((a,b)=>a.v-b.v)[0];if(low.v<=2||(lastRound()&&low.v<=4))i=tD.indexOf(low)}
@@ -909,7 +896,7 @@ async function humanConf(s,final){
   const again=await choose(show(`Risultato: <b class="num">${confVal(r.type,v)}</b>. Puoi rilanciare una volta tutti i dadi.`),[[false,'Accetta'],[true,'Rilancia tutti']]);
   if(again){r.first=[...v];v=v.map(()=>rnd(6))}
   if(final&&s==='L'&&hasCard('L','falsa')){
-    const pick=await ui(show(`Risultato: <b class="num">${confVal(r.type,v)}</b>.`)+cardHTML('falsa','L','use')+`<p>Scegli un dado da aumentare di 3, oppure tieni la carta.</p>
+    const pick=await ui(show(`Risultato: <b class="num">${confVal(r.type,v)}</b>.`)+cardHTML('falsa','L')+`<p>Scegli un dado da aumentare di 3, oppure tieni la carta.</p>
       <div class="row">${v.map((x,i)=>`<button class="btn" data-i="${i}">Dado ${x} → ${Math.min(6,x+3)}</button>`).join('')}<button class="btn" data-i="-1">Non usare</button></div>`,
       (st,res)=>st.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>res(+b.dataset.i)));
     if(pick>=0){useCard('L');r.falsa=[v[pick],Math.min(6,v[pick]+3),pick];v[pick]=r.falsa[1]}
@@ -1023,13 +1010,13 @@ async function drawCards(){
     <p>Fine della prima fase: Fuga <b class="num">${G.F}</b>, Inseguimento <b class="num">${G.I}</b>. ${behind?`È indietro ${behind==='L'?'il Ladro':'la Polizia'}: pesca due carte e ne tiene una. ${behind==='L'?'La Polizia':'Il Ladro'} ne pesca una a caso.`:'Parità: entrambi pescano una carta a caso.'}</p>`;
   if(behind===h){
     const two=pickTwo(h);
-    G.cards[h]=await ui(intro+`<p>Sei indietro: hai pescato due carte. Leggi il mini tutorial e tieni quella che ti serve; l’altra torna nel mazzo.</p>
-      <div class="pick2">${two.map(id=>`<div class="pickc">${cardHTML(id,h,'pick')}<button class="btn primary" data-k="${id}">Tieni ${esc(cardById(id).n)}</button></div>`).join('')}</div>`,
+    G.cards[h]=await ui(intro+`<p>Sei indietro: hai pescato due carte. Tieni quella che ti serve; l’altra torna nel mazzo.</p>
+      <div class="pick2">${two.map(id=>`<div class="pickc">${cardHTML(id,h)}<button class="btn primary" data-k="${id}">Tieni ${esc(cardById(id).n)}</button></div>`).join('')}</div>`,
       (st,res)=>st.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>res(b.dataset.k)));
     if(G.abort)return;
   }else G.cards[h]=pickRandom(h);
   log(`Fine prima fase: Fuga ${G.F}, Inseguimento ${G.I}. ${behind?`${NAME[behind]} sceglie tra due carte, ${NAME[opp(behind)]} ne pesca una a caso.`:'Entrambi pescano una carta a caso.'}`,'S');
-  await pause(intro+`<p>La tua carta:</p>${cardHTML(G.cards[h],h,'pick')}
+  await pause(intro+`<p>La tua carta:</p>${cardHTML(G.cards[h],h)}
     <p class="muted">Resta segreta finché non la giochi. Se non la usi entro la fine, non ha effetto. ${behind===c?'L’avversario ha scelto la sua carta e la tiene coperta.':'L’avversario tiene una carta coperta.'}</p>`,'Inizia la seconda fase');
   G.stage='round';
 }
