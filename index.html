@@ -352,27 +352,27 @@ const CARDS={
   {id:'posto',n:'Posto di blocco',q:'All’inizio di un round, prima del lancio del Ladro.',e:'In questo round il valore complessivo della Difesa non può superare 3.'},
   {id:'rinforzi',n:'Rinforzi tattici',q:'Dopo le assegnazioni del Ladro, prima del lancio della Polizia.',e:'In questo round la Polizia lancia un dado in più.'},
   {id:'tiratore',n:'Tiratore scelto',q:'Dopo le assegnazioni del Ladro, prima del lancio della Polizia.',e:'In questo round il dado Esposizione non viene capovolto.'},
-  {id:'supporto',n:'Supporto aereo',q:'Dopo le assegnazioni del Ladro, prima del lancio della Polizia.',e:'Aggiungi alla Sparatoria metà del dado Fuga più alto del Ladro, arrotondata per eccesso.'},
+  {id:'supporto',n:'Supporto aereo',q:'Dopo le assegnazioni del Ladro, prima del lancio della Polizia.',e:'Aggiungi all’Assalto metà del dado Fuga più alto del Ladro, arrotondata per eccesso.'},
   {id:'motore',n:'Motore potenziato',q:'Dopo le assegnazioni del Ladro, prima del lancio della Polizia.',e:'In questo round uno dei tuoi dadi a sei facce diventa un dado a dieci facce.'},
-  {id:'fuoco',n:'Fuoco di copertura',q:'Dopo le assegnazioni del Ladro, prima del lancio della Polizia.',e:'In questo round puoi dichiarare una Raffica senza ridurre l’Inseguimento.'}],
+  {id:'fuoco',n:'Fuoco di copertura',q:'Dopo le assegnazioni del Ladro, prima del lancio della Polizia.',e:'In questo round puoi dichiarare un Colpo extra senza ridurre l’Inseguimento.'}],
  L:[
   {id:'rifugio',n:'Rifugio segreto',q:'Subito dopo aver perso punti Fuga in un round.',e:'Recuperi fino a 3 dei punti Fuga appena persi.'},
   {id:'moto',n:'Moto veloce',q:'All’inizio del primo o del secondo round, prima del tuo lancio.',e:'Due dadi di valore diverso alla Fuga (sommati), un solo dado alla Difesa, uno all’Esposizione.'},
-  {id:'basista',n:'Basista informato',q:'All’inizio di un round, prima del lancio della Polizia.',e:'La Polizia agisce per prima: 1 Inseguimento e 2 Sparatoria (3 con Raffica), senza Esposizione. Poi tu assegni 1 Fuga e 2 Difesa.'},
+  {id:'basista',n:'Basista informato',q:'All’inizio di un round, prima del lancio della Polizia.',e:'La Polizia agisce per prima: 1 Inseguimento e 2 in Assalto (3 con Colpo extra), senza Esposizione. Poi tu assegni 1 Fuga e 2 Difesa.'},
   {id:'falsa',n:'Falsa pista',q:'In un round, dopo il tuo lancio e l’eventuale rilancio.',e:'Aumenti di 3 uno dei tuoi dadi, senza superare 6.'},
   {id:'sabot',n:'Sabotaggio',q:'All’inizio di un round, prima del tuo lancio.',e:'In questo round la Polizia non può rilanciare.'},
-  {id:'regalo',n:'Regalo esplosivo',q:'All’inizio di un round, prima del tuo lancio.',e:'Il tuo dado Fuga vale zero, puoi rilanciare un solo dado, se la Difesa supera la Sparatoria la Polizia perde il doppio, niente Raffica.'}]
+  {id:'regalo',n:'Regalo esplosivo',q:'All’inizio di un round, prima del tuo lancio.',e:'Il tuo dado Fuga vale zero, puoi rilanciare un solo dado, se la Difesa supera l’Assalto la Polizia perde il doppio, niente Colpo extra.'}]
 };
 
 /* ===================== Vocabolario dei due mondi ===================== */
 let MODE='P';
 const VOC={
  P:{name:{P:'Daniele',L:'Lucifero'},
-    t:{Fuga:'Latitanza',Difesa:'Noncuranza',Esposizione:'Curiosità',Inseguimento:'Entusiasmo',Sparatoria:'Megariff',Raffica:'Doppia cassa',Rapido:'Assolo su una corda',Disperato:'Crowd surfing'},
+    t:{},
     cards:{posto:'Nostalgia WinAmp',rinforzi:'Ma quanto è bello il sax nel black metal?',tiratore:'Pogo educato',supporto:'Muro di amplificatori',motore:'Chitarra a sette corde',fuoco:'Blast beat',
            rifugio:'Forcone dall’arrotino',moto:'Disco Inferno',basista:'Playlist su Spotify craccato',falsa:'Impegno inventato',sabot:'Cavo di Temu difettoso',regalo:'Plettro maledetto'}},
  L:{name:{L:'Daniele',P:'Lucifero'},
-    t:{Fuga:'Scusa',Difesa:'Modalità aereo',Esposizione:'Spunta blu',Inseguimento:'Assillo',Sparatoria:'Pressione',Raffica:'Guscio blu',Rapido:'Ghosting',Disperato:'Rage quit'},
+    t:{},
     cards:{posto:'Let’s-a-go!',rinforzi:'Il fascino discreto del multiplayer',tiratore:'Ti vedo online',supporto:'Gruppo WhatsApp',motore:'Controller pro',fuoco:'Pizza Diavola',
            rifugio:'Salvataggio rapido',moto:'Gameplay su YouTube',basista:'Zelda monella',falsa:'Batteria al 3%',sabot:'Maledetto Wi-Fi!',regalo:'Ho una bruschetta in un occhio'}}
 };
@@ -385,13 +385,9 @@ function buildRules(){
   R.push([/\bRinforzi\b/g,v.cards.rinforzi]);
   R.push([/\b[Ii]l Ladro\b/g,n.L],[/\bal Ladro\b/g,'a '+n.L],[/\bdel Ladro\b/g,'di '+n.L],[/\bdal Ladro\b/g,'da '+n.L],[/\bLadro\b/g,n.L]);
   R.push([/\b[Ll]a Polizia\b/g,n.P],[/\b([Aa])lla Polizia\b/g,'$1 '+n.P],[/\b([Dd])ella Polizia\b/g,'$1i '+n.P],[/\b([Dd])alla Polizia\b/g,'$1a '+n.P],[/\bPolizia\b/g,n.P]);
-  R.push([/\b(l|L|dell|Dell|all|All|nell|Nell|dall|Dall|sull|Sull)[’']Esposizione\b/g,'$1a '+t.Esposizione],[/\b([Uu])n[’']Esposizione\b/g,'$1na '+t.Esposizione]);
   const masc=(src,dst)=>R.push([new RegExp('\\b([Uu])na '+src+'\\b','g'),'$1n '+dst],[new RegExp('\\bla '+src+'\\b','g'),'il '+dst],[new RegExp('\\bLa '+src+'\\b','g'),'Il '+dst],
     [new RegExp('\\b(dell|all|nell|dall|sull)a '+src+'\\b','gi'),(m,a)=>a.slice(0,-1)+' '+dst]);
-  if(MODE==='L')masc('Raffica','Guscio blu');
-  if(MODE==='P')masc('Sparatoria','Megariff');
   R.push([/\bper prima\b/g,'per primo']);
-  R.push([/\bRaffiche\b/g,MODE==='L'?'Gusci blu':MODE==='P'?'Doppie casse':'Raffiche']);
   for(const [k,w] of Object.entries(t))R.push([new RegExp('\\b'+k+'\\b','g'),w]);
   RULES=R;
 }
@@ -423,7 +419,7 @@ const DOSSIERS=[
  {name:'Pane Asimov',reward:'Tema Cozy',items:[
   ['Dieci lunghezze','Vinci con almeno 10 punti di distacco',p=>[p.bigWins,1]],
   ['Uno basta','Usa un 1 in un dado di difesa o di attacco',p=>[p.ones,1]],
-  ['Vittoria al minimo','Vinci dopo aver fallito un Disperato nel confronto di fine fase',p=>[p.minWins,1]],
+  ['Vittoria al minimo','Vinci dopo aver fallito una Mossa rischiosa nel confronto di fine fase',p=>[p.minWins,1]],
   ['Carta nel cassetto','Vinci 3 volte senza usare la carta pescata',p=>[p.drawerWins,3]],
   ['Senza aiuti','Vinci una partita completa senza usare carte',p=>[p.cleanFullWins,1]]]},
  {name:'Leggenda dei 40',reward:'Bonus track: la setlist',items:[
@@ -496,7 +492,7 @@ function renderBoard(){
      <span class="who">Ladro · ${isHuman('L')?'tu':'CPU'}</span><div class="held">${held('L')}</div></div>
    <div class="mid"><b>${rd}</b><span class="lbl">${ph}${G.expert?' · Esperti':''}</span>${calcBtn()}</div>
    <div class="side P"><span class="lbl">Inseguimento</span><span class="score num">${G.I}</span>
-     <span class="who">Polizia · ${isHuman('P')?'tu':'CPU'}</span><span class="tokdot ${G.tok?'on':''}" title="${G.tok?'Gettone disponibile':'Gettone già usato o non disponibile'}">${G.tok?'●':'○'} gettone</span><span class="tokdot on raffc" title="Quante ne restano in questa fase">Raffica ${"■".repeat(raffLeft())}${"□".repeat(RAFF_MAX-raffLeft())}</span><div class="held" style="justify-content:flex-end">${held('P')}</div></div>`;
+     <span class="who">Polizia · ${isHuman('P')?'tu':'CPU'}</span><span class="tokdot ${G.tok?'on':''}" title="${G.tok?'Gettone disponibile':'Gettone già usato o non disponibile'}">${G.tok?'●':'○'} gettone</span><span class="tokdot on raffc" title="Quante ne restano in questa fase">Colpo extra ${"■".repeat(raffLeft())}${"□".repeat(RAFF_MAX-raffLeft())}</span><div class="held" style="justify-content:flex-end">${held('P')}</div></div>`;
 }
 function calcBtn(){const on=P.prefs.calc!==false;return `<button class="calctog" data-calc aria-pressed="${on}">Calcoli: ${on?'sì':'no'}</button>`}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-calc]');if(!b)return;
@@ -637,10 +633,10 @@ function thiefValidate(R,zones){return a=>{
   if(G.expert&&!G.relax)return disjointErr(a,zones.map(z=>z.key),false);
   return null}}
 const ZINFO={fuga:'Il valore va dritto nei punti Fuga del Ladro: più è alto, meglio è.',
-  dif:'Si somma e si confronta con la Sparatoria della Polizia. Se la Difesa è più alta, la Polizia perde la differenza; se è più bassa, la perde il Ladro. Ogni dado messo qui dà alla Polizia un dado Sparatoria.',
+  dif:'Si somma e si confronta con l’Assalto della Polizia. Se la Difesa è più alta, la Polizia perde la differenza; se è più bassa, la perde il Ladro. Ogni dado messo qui dà alla Polizia un dado in Assalto.',
   expo:'Questo dado passa alla Polizia capovolto: 1↔6, 2↔5, 3↔4. Un dado alto qui arriva alla Polizia come un dado basso.',
   ins:'Il valore va dritto nei punti Inseguimento della Polizia. Qui puoi usare anche il dado Esposizione ricevuto dal Ladro.',
-  spar:'Si somma e si confronta con la Difesa del Ladro. Se la Sparatoria è più alta, il Ladro perde la differenza in punti Fuga; se è più bassa, la perde la Polizia.'};
+  spar:'Si somma e si confronta con la Difesa del Ladro. Se l’Assalto è più alto, il Ladro perde la differenza in punti Fuga; se è più basso, la perde la Polizia.'};
 function humanTok(a){if(a&&a.tok){G.tok=false;log(`${NAME.P} usa il gettone: un dado passa da ${a.tok.from} a ${a.tok.to}.`,'P')}return a}
 function cpuTok(a,R,zones,validate,basista){
   if(!G.tok||!a)return a;
@@ -657,10 +653,10 @@ function cpuTok(a,R,zones,validate,basista){
   log(`${NAME.P} (CPU) usa il gettone: un dado passa da ${from} a ${t.v}.`,'P');
   return b;
 }
-function policeZones(need){return [{key:'ins',label:'Inseguimento',min:1,max:1,hint:'1 dado · punti Inseguimento'},{key:'spar',label:'Sparatoria',min:need,max:need,hint:`${need} ${need===1?'dado':'dadi'} · contro la Difesa`}]}
+function policeZones(need){return [{key:'ins',label:'Inseguimento',min:1,max:1,hint:'1 dado · punti Inseguimento'},{key:'spar',label:'Assalto',min:need,max:need,hint:`${need} ${need===1?'dado':'dadi'} · contro la Difesa`}]}
 function policeValidate(zones,dice){return a=>{
   const e=countErr(a,zones);if(e)return e;
-  const ex=dice.find(d=>d.expo);if(ex&&![...a.ins,...a.spar].some(d=>d.expo))return 'Il dado Esposizione va usato in Inseguimento o Sparatoria.';
+  const ex=dice.find(d=>d.expo);if(ex&&![...a.ins,...a.spar].some(d=>d.expo))return 'Il dado Esposizione va usato in Inseguimento o Assalto.';
   if(G.expert&&!G.relax)return disjointErr(a,['ins','spar'],true);
   return null}}
 
@@ -714,7 +710,7 @@ function cpuRaffica(R,expoV){
   if(CPU_CFG.police==='old')return R.defTot/R.tA.dif.length>=5&&Math.random()<.7;
   const pe=policeExpect(R.tA.dif.length,R.defTot,expoV,R.fugaGain,R);
   if(CPU_CFG.police==='smart')return pe.e1>pe.e0;
-  // morbida: solo quando la Raffica serve davvero, e non sempre
+  // morbida: solo quando il Colpo extra serve davvero, e non sempre
   return pe.e1>pe.e0+1.5&&Math.random()<.6}
 function cpuThief(dice,R){
   const zones=thiefZones(R),val=thiefValidate(R,zones);prepRelax(dice,zones,val);
@@ -723,7 +719,7 @@ function cpuThief(dice,R){
     if(R.basista){const sp=R.pA.sparTot;let s=f;if(sp>def)s-=Math.min(G.F+f,sp-def);else s+=Math.min(G.I,(def-sp)*(R.regalo?2:1));return s}
     const e=a.expo[0].v;
     if(CPU_CFG.thief==='old')return f+.85*(def-4.6*a.dif.length)+.35*e-(R.posto&&a.dif.length===2?1:0);
-    // tiene conto di quanto può fare la Polizia, Raffica compresa
+    // tiene conto di quanto può fare la Polizia, Colpo extra compresa
     const pe=policeExpect(a.dif.length,def,7-e,f,R);return f-Math.max(pe.e0,pe.e1);
   };
   return bestOf(enumerate(dice,zones),score,val,zones.map(z=>z.key));
@@ -822,15 +818,15 @@ async function normalRound(R){
   const thiefBox=`<div class="panel" style="background:var(--thief-soft);border:0;gap:6px"><span class="lbl">Assegnazioni del Ladro</span>
      <div class="row"><span>Fuga</span>${diceRow(R.tA.fuga.map(d=>d.v),'L')}<span>Difesa</span>${diceRow(R.tA.dif.map(d=>d.v),'L')}<b class="num">= ${R.defTot}</b></div>
      <div class="row"><span>Esposizione ${R.tA.expo[0].v} → per te</span>${diceRow([expoV],'L')}${R.tiratore?'<span class="muted">(Tiratore scelto: non capovolto)</span>':''}</div></div>`;
-  // Raffica
+  // Colpo extra
   if(R.regalo)R.raffica=false;
   else if(isHuman('P')){
-    if(!R.fuoco&&raffLeft()<=0){R.raffica=false;await pause(`<h2 class="who-P">Niente Raffica</h2>${thiefBox}<p>Raffiche disponibili in questa fase: 0 su ${RAFF_MAX}. Nella prossima fase si riparte da ${RAFF_MAX}.</p>`,'Lancia i dadi')}
-    else R.raffica=await choose(`<h2 class="who-P">Dichiari una Raffica?</h2>${thiefBox}<p>La Raffica aggiunge un dado alla Sparatoria (${R.tA.dif.length+1} invece di ${R.tA.dif.length})${R.fuoco?'. Con Fuoco di copertura non perdi punti Inseguimento e non la consumi.':` ma riduce di 2 l’Inseguimento del round. Te ne restano <b>${raffLeft()}</b> su ${RAFF_MAX} in questa fase.`}</p>`,[[false,'Niente Raffica'],[true,'Dichiara Raffica']]);
+    if(!R.fuoco&&raffLeft()<=0){R.raffica=false;await pause(`<h2 class="who-P">Niente Colpo extra</h2>${thiefBox}<p>Colpi extra disponibili in questa fase: 0 su ${RAFF_MAX}. Nella prossima fase si riparte da ${RAFF_MAX}.</p>`,'Lancia i dadi')}
+    else R.raffica=await choose(`<h2 class="who-P">Dichiari un Colpo extra?</h2>${thiefBox}<p>Il Colpo extra aggiunge un dado all’Assalto (${R.tA.dif.length+1} invece di ${R.tA.dif.length})${R.fuoco?'. Con Fuoco di copertura non perdi punti Inseguimento e non la consumi.':` ma riduce di 2 l’Inseguimento del round. Te ne restano <b>${raffLeft()}</b> su ${RAFF_MAX} in questa fase.`}</p>`,[[false,'Niente Colpo extra'],[true,'Dichiara Colpo extra']]);
   }
   else R.raffica=cpuRaffica(R,expoV);
   spendRaffica(R);
-  if(R.raffica)log(`Polizia dichiara una Raffica${R.fuoco?' (Fuoco di copertura)':''}.`,'P');
+  if(R.raffica)log(`Polizia dichiara un Colpo extra${R.fuoco?' (Fuoco di copertura)':''}.`,'P');
   const need=R.tA.dif.length+(R.raffica?1:0);
   const ex={id:'x',v:expoV,sides:6,side:'L',expo:true};
   let pD;
@@ -838,18 +834,18 @@ async function normalRound(R){
   else pD=cpuRoll('P',R.nP+(R.rinforzi?1:0),{noRe:R.sabot,d10:R.motore});
   if(G.abort)return;
   const all=[...pD,ex],pz=policeZones(need);
-  const pInfo=thiefBox+`<p class="muted">Servono 1 Inseguimento e ${need} Sparatoria. Il dado Esposizione (bordo tratteggiato) va usato in una delle due.${R.supBonus?` Supporto aereo: +${R.supBonus} alla Sparatoria.`:''}</p>`;
+  const pInfo=thiefBox+`<p class="muted">Servono 1 Inseguimento e ${need} Assalto. Il dado Esposizione (bordo tratteggiato) va usato in una delle due.${R.supBonus?` Supporto aereo: +${R.supBonus} all’Assalto.`:''}</p>`;
   R.pA=isHuman('P')?humanTok(await humanAssign({side:'P',dice:all,zones:pz,validate:policeValidate(pz,all),info:pInfo})):cpuTok(cpuPolice(all,R,need),R,pz,policeValidate(pz,all),false);
   if(G.abort)return;
-  if(!isHuman('P'))await cpuPanel('P','Turno della Polizia (CPU)',`<p>${R.raffica?`Dichiara una <b>Raffica</b>${R.fuoco?' senza penalità (Fuoco di copertura)':' (−2 all’Inseguimento)'}.`:R.regalo?'Non può dichiarare la Raffica (Regalo esplosivo).':'Non dichiara la Raffica.'} Riceve l’Esposizione come ${expoV}.</p>
+  if(!isHuman('P'))await cpuPanel('P','Turno della Polizia (CPU)',`<p>${R.raffica?`Dichiara un <b>Colpo extra</b>${R.fuoco?' senza penalità (Fuoco di copertura)':' (−2 all’Inseguimento)'}.`:R.regalo?'Non può dichiarare il Colpo extra (Regalo esplosivo).':'Non dichiara il Colpo extra.'} Riceve l’Esposizione come ${expoV}.</p>
     <span class="lbl">Lancia ${R.nP+(R.rinforzi?1:0)} dadi${R.motore?', uno a dieci facce':''}</span>${rollStory(pD,'P')}<span class="lbl">Assegnazioni</span>${assignStory(R.pA,pz,all,'P')}
-    ${R.supBonus?`<p>Supporto aereo: +${R.supBonus} alla Sparatoria.</p>`:''}`);
+    ${R.supBonus?`<p>Supporto aereo: +${R.supBonus} all’Assalto.</p>`:''}`);
   if(isHuman('P')){trackHuman(R.pA.spar.map(d=>d.v),'spar');trackHuman(R.pA.ins.map(d=>d.v),'x')}
 }
 async function basistaRound(R){
   // La Polizia agisce per prima
-  if(isHuman('P'))R.raffica=raffLeft()>0?await choose(`<h2 class="who-P">Basista informato: agisci per prima</h2><p>Assegnerai 1 Inseguimento e 2 Sparatoria, oppure 3 con la Raffica (−2 all’Inseguimento). Raffiche disponibili in questa fase: <b>${raffLeft()}</b> su ${RAFF_MAX}.</p>`,[[false,'Niente Raffica'],[true,'Dichiara Raffica']])
-    :(await pause(`<h2 class="who-P">Basista informato: agisci per prima</h2><p>Assegnerai 1 Inseguimento e 2 Sparatoria. Raffiche finite per questa fase.</p>`),false);
+  if(isHuman('P'))R.raffica=raffLeft()>0?await choose(`<h2 class="who-P">Basista informato: agisci per prima</h2><p>Assegnerai 1 Inseguimento e 2 in Assalto, oppure 3 con il Colpo extra (−2 all’Inseguimento). Colpi extra disponibili in questa fase: <b>${raffLeft()}</b> su ${RAFF_MAX}.</p>`,[[false,'Niente Colpo extra'],[true,'Dichiara Colpo extra']])
+    :(await pause(`<h2 class="who-P">Basista informato: agisci per prima</h2><p>Assegnerai 1 Inseguimento e 2 in Assalto. Colpi extra finite per questa fase.</p>`),false);
   else R.raffica=raffLeft()>0&&Math.random()<.35;
   spendRaffica(R);
   const need=2+(R.raffica?1:0);
@@ -860,10 +856,10 @@ async function basistaRound(R){
   if(G.abort)return;
   if(isHuman('P')){trackHuman(R.pA.spar.map(d=>d.v),'spar');trackHuman(R.pA.ins.map(d=>d.v),'x')}
   R.pA.sparTot=sum(R.pA.spar.map(d=>d.v));
-  if(!isHuman('P'))await cpuPanel('P','Turno della Polizia (CPU) · agisce per prima',`<p>${R.raffica?'Dichiara una <b>Raffica</b> (−2 all’Inseguimento).':'Non dichiara la Raffica.'}</p><span class="lbl">Lancia ${R.nP} dadi</span>${rollStory(pD,'P')}<span class="lbl">Assegnazioni</span>${assignStory(R.pA,pz,pD,'P')}`);
-  log(`Polizia: Inseguimento ${R.pA.ins[0].v} · Sparatoria ${R.pA.spar.map(d=>d.v).join('+')}.`,'P');
+  if(!isHuman('P'))await cpuPanel('P','Turno della Polizia (CPU) · agisce per prima',`<p>${R.raffica?'Dichiara un <b>Colpo extra</b> (−2 all’Inseguimento).':'Non dichiara il Colpo extra.'}</p><span class="lbl">Lancia ${R.nP} dadi</span>${rollStory(pD,'P')}<span class="lbl">Assegnazioni</span>${assignStory(R.pA,pz,pD,'P')}`);
+  log(`Polizia: Inseguimento ${R.pA.ins[0].v} · Assalto ${R.pA.spar.map(d=>d.v).join('+')}.`,'P');
   const pBox=`<div class="panel" style="background:var(--police-soft);border:0;gap:6px"><span class="lbl">Assegnazioni della Polizia</span>
-     <div class="row"><span>Inseguimento</span>${diceRow([R.pA.ins[0].v],'P')}<span>Sparatoria</span>${diceRow(R.pA.spar.map(d=>d.v),'P')}<b class="num">= ${R.pA.sparTot}</b></div></div>`;
+     <div class="row"><span>Inseguimento</span>${diceRow([R.pA.ins[0].v],'P')}<span>Assalto</span>${diceRow(R.pA.spar.map(d=>d.v),'P')}<b class="num">= ${R.pA.sparTot}</b></div></div>`;
   const tD=isHuman('L')?await humanRoll('L',R.nL,{info:pBox}):cpuRoll('L',R.nL,{});
   if(G.abort)return;
   await falsaPista(tD);
@@ -882,7 +878,7 @@ async function resolveRound(R){
   const difRaw=sum(R.tA.dif.map(d=>d.v)),def=R.defTot;
   G.F+=R.fugaGain;G.I+=ins;
   const Fmid=G.F,Imid=G.I;
-  let line=`Fuga +${R.fugaGain}, Inseguimento +${ins}${pen?' (Raffica −2)':''}. Sparatoria ${spar} contro Difesa ${def}: `;
+  let line=`Fuga +${R.fugaGain}, Inseguimento +${ins}${pen?' (Colpo extra −2)':''}. Assalto ${spar} contro Difesa ${def}: `;
   let lost=0,plost=0,back=0;
   if(spar>def){lost=Math.min(G.F,spar-def);G.F-=lost;line+=`il Ladro perde ${lost}.`}
   else if(def>spar){plost=Math.min(G.I,(def-spar)*(R.regalo?2:1));G.I-=plost;line+=`la Polizia perde ${plost}${R.regalo?' (doppio, Regalo esplosivo)':''}.`}
@@ -892,10 +888,10 @@ async function resolveRound(R){
   const calc=()=>{
     const gain=[
       crow(`${NAME.L} · Fuga`,`${R.tA.fuga.map(d=>d.v).join(' + ')}${R.tA.fuga.length>1?` = ${sum(R.tA.fuga.map(d=>d.v))}`:''}${R.regalo?' → vale 0 per Regalo esplosivo':''}`,`+${R.fugaGain}`,'L'),
-      crow(`${NAME.P} · Inseguimento`,`${dv(insDie)}${pen?` − 2 per la Raffica${insDie.v<2?', minimo 0':''}`:R.raffica?' (Raffica senza penalità: Fuoco di copertura)':''}`,`+${ins}`,'P')];
+      crow(`${NAME.P} · Inseguimento`,`${dv(insDie)}${pen?` − 2 per il Colpo extra${insDie.v<2?', minimo 0':''}`:R.raffica?' (Colpo extra senza penalità: Fuoco di copertura)':''}`,`+${ins}`,'P')];
     const fight=[
       crow(`${NAME.L} · Difesa`,`${R.tA.dif.map(d=>d.v).join(' + ')}${R.tA.dif.length>1?` = ${difRaw}`:''}${R.posto&&difRaw>3?' → limite 3 per Posto di blocco':''}`,def),
-      crow(`${NAME.P} · Sparatoria`,`${sparDice.map(dv).join(' + ')}${R.supBonus?` + ${R.supBonus} Supporto aereo (metà di ${Math.max(...R.tA.fuga.map(d=>d.v))}, per eccesso)`:''}${sparDice.length>1||R.supBonus?` = ${spar}`:''}`,spar)];
+      crow(`${NAME.P} · Assalto`,`${sparDice.map(dv).join(' + ')}${R.supBonus?` + ${R.supBonus} Supporto aereo (metà di ${Math.max(...R.tA.fuga.map(d=>d.v))}, per eccesso)`:''}${sparDice.length>1||R.supBonus?` = ${spar}`:''}`,spar)];
     if(spar>def)fight.push(crow('Danno al Ladro',`${spar} − ${def} = ${spar-def}${lost<spar-def?` → la Fuga non scende sotto zero, si perdono solo ${lost}`:''}`,`−${lost}`,'neg'));
     else if(def>spar)fight.push(crow('Danno alla Polizia',`${def} − ${spar} = ${def-spar}${R.regalo?` × 2 Regalo esplosivo = ${(def-spar)*2}`:''}${plost<(def-spar)*(R.regalo?2:1)?` → l’Inseguimento non scende sotto zero, si perdono solo ${plost}`:''}`,`−${plost}`,'neg'));
     else fight.push(crow('Danno',`${spar} = ${def}: parità`,'0'));
@@ -903,13 +899,13 @@ async function resolveRound(R){
     const tot=[
       crow(`${NAME.L} · Fuga`,`${F0} + ${R.fugaGain}${lost?` − ${lost}`:''}${back?` + ${back}`:''}`,G.F,'L tot'),
       crow(`${NAME.P} · Inseguimento`,`${I0} + ${ins}${plost?` − ${plost}`:''}`,G.I,'P tot')];
-    return calcBox([csec('Punti del round',gain),csec('Sparatoria contro Difesa',fight),csec('Nuovi punteggi',tot)]);
+    return calcBox([csec('Punti del round',gain),csec('Assalto contro Difesa',fight),csec('Nuovi punteggi',tot)]);
   };
   const head=()=>`<h2>Risoluzione del round ${G.round}</h2>
    <div class="summary">
     <div><span class="lbl">Fuga</span><b class="num" style="color:var(--thief)">+${R.fugaGain}</b></div>
     <div><span class="lbl">Inseguimento</span><b class="num" style="color:var(--police)">+${ins}</b></div>
-    <div><span class="lbl">Sparatoria</span><b class="num">${spar}</b></div>
+    <div><span class="lbl">Assalto</span><b class="num">${spar}</b></div>
     <div><span class="lbl">Difesa</span><b class="num">${def}</b></div></div>
    <p>${spar>def?`Il Ladro perde <b>${lost}</b> punti Fuga.`:def>spar?`La Polizia perde <b>${plost}</b> punti Inseguimento.`:'Parità: nessuno perde punti.'}</p>`;
   if(lost>0&&hasCard('L','rifugio')){
@@ -928,11 +924,11 @@ async function humanConf(s,final){
   const nd=r.rinforzi?3:2;
   r.type=await choose(`<h2 class="who-${s}">${final?'Confronto finale':'Confronto di fine fase'}</h2>
     <p>Scegli in segreto la tua mossa. L’avversario sceglie nello stesso momento.</p>
-    <div class="seg"><div class="opt"><b>Rapido</b><small>${nd} dadi, conti solo il più alto. Massimo 6.</small></div>
-    <div class="opt"><b>Disperato</b><small>${nd===3?'Lanci 3 dadi e sommi i due più alti':'Somma i due dadi'}. Se almeno uno dei due è 1, il tiro è nullo.</small></div></div>`,
-    [['R','Rapido'],['D','Disperato']]);
+    <div class="seg"><div class="opt"><b>Mossa sicura</b><small>${nd} dadi, conti solo il più alto. Massimo 6.</small></div>
+    <div class="opt"><b>Mossa rischiosa</b><small>${nd===3?'Lanci 3 dadi e sommi i due più alti':'Somma i due dadi'}. Se almeno uno dei due è 1, il tiro è nullo.</small></div></div>`,
+    [['R','Mossa sicura'],['D','Mossa rischiosa']]);
   let v=Array.from({length:nd},()=>rnd(6));
-  const show=(t)=>`<h2 class="who-${s}">${r.type==='R'?'Rapido':'Disperato'}</h2><div class="tray">${v.map(x=>dieHTML({v:x,side:s},'new static')).join('')}</div><p>${t}</p>`;
+  const show=(t)=>`<h2 class="who-${s}">${r.type==='R'?'Mossa sicura':'Mossa rischiosa'}</h2><div class="tray">${v.map(x=>dieHTML({v:x,side:s},'new static')).join('')}</div><p>${t}</p>`;
   const again=await choose(show(`Risultato: <b class="num">${confVal(r.type,v)}</b>. Puoi rilanciare una volta tutti i dadi.`),[[false,'Accetta'],[true,'Rilancia tutti']]);
   if(again){r.first=[...v];v=v.map(()=>rnd(6))}
   if(final&&s==='L'&&hasCard('L','falsa')){
@@ -966,7 +962,7 @@ async function confronto(final){
   const F0=G.F,I0=G.I;
   G.F+=res.L.val;G.I+=res.P.val;
   if(hr.type==='D'&&hr.val===0)G.t.failedD=true;
-  const tn=t=>t==='R'?'Rapido':'Disperato';
+  const tn=t=>t==='R'?'Mossa sicura':'Mossa rischiosa';
   log(`Confronto: Ladro ${tn(res.L.type)} ${res.L.v.join('·')} → +${res.L.val}; Polizia ${tn(res.P.type)} ${res.P.v.join('·')} → +${res.P.val}.`,'S');
   const col=s=>`<div class="panel" style="background:var(--${s==='L'?'thief':'police'}-soft);border:0">
      <span class="lbl">${NAME[s]} · ${tn(res[s].type)}${res[s].rinforzi?' · Rinforzi tattici':''}${res[s].falsa?' · Falsa pista':''}</span>
@@ -976,8 +972,8 @@ async function confronto(final){
     if(r.first)rows.push(crow('Rilancio',`primo lancio ${r.first.join(' · ')} → rilanciati tutti → ${(r.falsa?v.map((x,i)=>i===r.falsa[2]?r.falsa[0]:x):v).join(' · ')}`,''));
     if(r.falsa)rows.push(crow('Falsa pista',`${r.falsa[0]} + 3 = ${r.falsa[0]+3}${r.falsa[0]+3>6?', massimo 6':''}`,r.falsa[1]));
     const srt=[...v].sort((a,b)=>b-a);
-    if(r.type==='R')rows.push(crow('Rapido',`${v.length===3?'3 dadi (Rinforzi) ':''}${v.join(' · ')} → conta il più alto`,`+${r.val}`,s));
-    else{const k=srt.slice(0,2);rows.push(crow('Disperato',`${v.length===3?`3 dadi (Rinforzi) ${v.join(' · ')} → si tengono ${k.join(' e ')}, `:''}${k.includes(1)?`${k.join(' + ')}: c’è un 1, la mossa fallisce`:`${k[0]} + ${k[1]}`}`,`+${r.val}`,s))}
+    if(r.type==='R')rows.push(crow('Mossa sicura',`${v.length===3?'3 dadi (Rinforzi) ':''}${v.join(' · ')} → conta il più alto`,`+${r.val}`,s));
+    else{const k=srt.slice(0,2);rows.push(crow('Mossa rischiosa',`${v.length===3?`3 dadi (Rinforzi) ${v.join(' · ')} → si tengono ${k.join(' e ')}, `:''}${k.includes(1)?`${k.join(' + ')}: c’è un 1, la mossa fallisce`:`${k[0]} + ${k[1]}`}`,`+${r.val}`,s))}
     return csec(NAME[s],rows)};
   const tot=csec('Nuovi punteggi',[crow(`${NAME.L} · Fuga`,`${F0} + ${res.L.val}`,G.F,'L tot'),crow(`${NAME.P} · Inseguimento`,`${I0} + ${res.P.val}`,G.I,'P tot')]);
   await pause(`<h2>Interventi rivelati</h2><div class="zones">${col('L')}${col('P')}</div>${calcBox([how('L'),how('P'),tot])}`);
@@ -1163,12 +1159,12 @@ const TUT=[
   p:'Ogni round lanciate 4 dadi a testa, 5 per chi è indietro. Puoi rilanciarne quanti vuoi, ma una volta sola.'},
  {t:'Il Ladro piazza i dadi',v:()=>`<div class="tzones">${tzone('Fuga',d6(5,'L'),'+5','L')}${tzone('Difesa',d6(4,'L')+d6(3,'L'),'7','L')}${tzone('Esposizione',d6(6,'L',{expo:true})+'<span class="tarrow">→</span>'+d6(1,'P'),'','L')}</div>`,
   p:'Un dado va in Fuga: sono punti. Uno o due in Difesa. L’ultimo va in Esposizione e passa alla Polizia capovolto: il 6 diventa 1. Conviene metterci un dado alto.'},
- {t:'La Polizia risponde',v:()=>`<div class="tzones">${tzone('Inseguimento',d6(1,'P'),'+1','P')}${tzone('Sparatoria',d6(6,'P')+d6(5,'P'),'11','P')}</div><div class="tchips"><span>Raffica: +1 dado, −2 punti, max 2 per fase</span><span>● Gettone: +1 o −1 a un dado</span></div>`,
-  p:'La Polizia mette 1 dado in Inseguimento e tanti dadi in Sparatoria quanti sono quelli in Difesa. Può usare anche il dado ricevuto.'},
- {t:'Lo scontro',v:()=>`<div class="tclash"><div><span>Sparatoria</span><b class="num">11</b></div><span class="tvs">contro</span><div><span>Difesa</span><b class="num">7</b></div></div><p class="tres">Il Ladro perde 11 − 7 = <b>4</b> punti Fuga</p>`,
+ {t:'La Polizia risponde',v:()=>`<div class="tzones">${tzone('Inseguimento',d6(1,'P'),'+1','P')}${tzone('Assalto',d6(6,'P')+d6(5,'P'),'11','P')}</div><div class="tchips"><span>Colpo extra: +1 dado, −2 punti, max 2 per fase</span><span>● Gettone: +1 o −1 a un dado</span></div>`,
+  p:'La Polizia mette 1 dado in Inseguimento e tanti dadi in Assalto quanti sono quelli in Difesa. Può usare anche il dado ricevuto.'},
+ {t:'Lo scontro',v:()=>`<div class="tclash"><div><span>Assalto</span><b class="num">11</b></div><span class="tvs">contro</span><div><span>Difesa</span><b class="num">7</b></div></div><p class="tres">Il Ladro perde 11 − 7 = <b>4</b> punti Fuga</p>`,
   p:'Si confrontano le somme. Chi ha il totale più basso perde la differenza dai suoi punti. Con “Calcoli: sì” vedi tutti i conti a fine round.'},
- {t:'A metà partita',v:()=>`<div class="tzones">${tzone('Rapido',d6(2,'L')+d6(5,'L'),'5')}${tzone('Disperato',d6(4,'L')+d6(6,'L'),'10')}${tzone('Disperato con un 1',d6(1,'L')+d6(6,'L'),'0','bad')}</div>`,
-  p:'Dopo la prima fase scegli in segreto: Rapido conta il dado più alto, Disperato la somma, ma vale zero se esce un 1. Poi arrivano le carte azione: chi è indietro ne pesca due e ne tiene una.'}
+ {t:'A metà partita',v:()=>`<div class="tzones">${tzone('Mossa sicura',d6(2,'L')+d6(5,'L'),'5')}${tzone('Mossa rischiosa',d6(4,'L')+d6(6,'L'),'10')}${tzone('Mossa rischiosa con un 1',d6(1,'L')+d6(6,'L'),'0','bad')}</div>`,
+  p:'Dopo la prima fase scegli in segreto: Mossa sicura conta il dado più alto, Mossa rischiosa la somma, ma vale zero se esce un 1. Poi arrivano le carte azione: chi è indietro ne pesca due e ne tiene una.'}
 ];
 let TUT_I=0;
 function renderTut(){
@@ -1240,8 +1236,8 @@ function menu(){
    <section class="panel">
      <span class="lbl">Scegli il tuo Daniele preferito</span>
      <div class="seg" id="roles">
-       <button class="opt P" data-r="P"><span class="who">Dani il Metallaro</span><small>Insegui Lucifero: deve entrare nella tua band Brutal Cozy Metal. Accumuli Entusiasmo.</small></button>
-       <button class="opt L" data-r="L"><span class="who">Dani il Nerd</span><small>Scappi da Lucifero: vuole a ogni costo sfidarti a Mario Kart. Accumuli Scuse e vinci solo se superi il suo Assillo.</small></button></div>
+       <button class="opt P" data-r="P"><span class="who">Dani il Metallaro</span><small>Insegui Lucifero: deve entrare nella tua band Brutal Cozy Metal. Accumuli Inseguimento.</small></button>
+       <button class="opt L" data-r="L"><span class="who">Dani il Nerd</span><small>Scappi da Lucifero: vuole a ogni costo sfidarti a Mario Kart. Accumuli Fuga e vinci solo se superi l’Inseguimento di Lucifero.</small></button></div>
      <span class="lbl">Modalità</span>
      <div class="seg" id="modes">
        <button class="opt" data-m="full"><b>Partita completa</b><small>Due fasi, carte azione, un confronto a metà partita.</small></button>
@@ -1260,12 +1256,13 @@ function menu(){
    <section class="panel"><details><summary>Regole complete</summary><dl class="rules">
      <dt>Lancio</dt><dd>4 dadi a testa; dal secondo round chi è indietro ne lancia 5. Un solo rilancio, di quanti dadi vuoi.</dd>
      <dt>Il Ladro</dt><dd>1 dado in Fuga, 1 o 2 in Difesa, 1 in Esposizione: passa alla Polizia capovolto (1↔6, 2↔5, 3↔4).</dd>
-     <dt>La Polizia</dt><dd>1 dado in Inseguimento e tanti in Sparatoria quanti i dadi in Difesa.</dd>
-     <dt>Raffica</dt><dd>Un dado in più in Sparatoria, ma −2 punti in quel round. Al massimo 2 per fase.</dd>
+     <dt>La Polizia</dt><dd>1 dado in Inseguimento e tanti in Assalto quanti i dadi in Difesa.</dd>
+     <dt>Colpo extra</dt><dd>Un dado in più in Assalto, ma −2 punti in quel round. Al massimo 2 per fase.</dd>
      <dt>Gettone ●</dt><dd>Solo la Polizia, uno per fase: +1 o −1 a un suo dado. Se non lo usa, lo perde.</dd>
-     <dt>Scontro</dt><dd>Sparatoria contro Difesa: chi ha meno perde la differenza. Mai sotto zero.</dd>
-     <dt>Metà partita</dt><dd>Confronto: Rapido (il più alto di 2 dadi) o Disperato (somma di 2, zero se esce un 1). Poi le carte: chi è indietro ne pesca due e ne tiene una, chi è avanti ne pesca una a caso. Ogni carta si usa una volta.</dd>
-     <dt>Fine</dt><dd>Dopo 6 round vince chi ha più punti; in parità vince la Polizia.</dd></dl></details></section>
+     <dt>Scontro</dt><dd>Assalto contro Difesa: chi ha meno perde la differenza. Mai sotto zero.</dd>
+     <dt>Metà partita</dt><dd>Confronto: Mossa sicura (il più alto di 2 dadi) o Mossa rischiosa (somma di 2, zero se esce un 1). Poi le carte: chi è indietro ne pesca due e ne tiene una, chi è avanti ne pesca una a caso. Ogni carta si usa una volta.</dd>
+     <dt>Fine</dt><dd>Dopo 6 round vince chi ha più punti; in parità vince la Polizia.</dd>
+     <dt>Nomi a tema</dt><dd>Metallaro / Nerd, per chi vuole il tema: Colpo extra = Doppia cassa / Guscio blu. Assalto = Megariff / Pressione. Fuga = Latitanza / Scusa. Difesa = Noncuranza / Modalità aereo. Esposizione = Curiosità / Spunta blu. Inseguimento = Entusiasmo / Assillo. Mossa sicura = Assolo su una corda / Ghosting. Mossa rischiosa = Crowd surfing / Rage quit.</dd></dl></details></section>
    </div>
    <div class="tabpanel" role="tabpanel" id="pane-dossier" aria-labelledby="tab-dossier" hidden>
      <p class="muted" style="margin:0">Completa i cinque traguardi di un dossier per chiuderlo e sbloccare il suo reward, che trovi nella scheda Extra.</p>
